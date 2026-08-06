@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <linearGradient id="blueGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="50%" stop-color="#00aaff"/>
+      <stop offset="100%" stop-color="#0077dd"/>
+    </linearGradient>
+    
+    <linearGradient id="darkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c2738"/>
+      <stop offset="100%" stop-color="#0e1622"/>
+    </linearGradient>
+
+    <linearGradient id="kitGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00ccff"/>
+      <stop offset="100%" stop-color="#0088ee"/>
+    </linearGradient>
+    
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="6" stdDeviation="16" flood-color="#000000" flood-opacity="0.07"/>
+    </filter>
+  </defs>
+  
+  <!-- App icon background -->
+  <rect x="30" y="30" width="1020" height="1020" rx="175" ry="175" fill="#ffffff" filter="url(#shadow)"/>
+  
+  <!-- ===== F LOGO ===== -->
+  
+  <!-- Upper dark blade (top bar of F) -->
+  <path d="
+    M 355 235
+    C 370 195, 410 175, 460 175
+    L 735 175
+    C 770 175, 790 195, 785 225
+    L 775 275
+    C 770 305, 745 325, 710 325
+    L 500 325
+    C 465 325, 440 345, 420 380
+    L 385 455
+    C 375 478, 358 478, 355 455
+    Z
+  " fill="url(#darkGrad)"/>
+  
+  <!-- Lower blue blade (middle bar + stem of F) -->
+  <path d="
+    M 340 530
+    C 338 505, 348 480, 368 458
+    L 415 395
+    C 438 365, 465 350, 500 350
+    L 660 350
+    C 698 350, 718 372, 715 405
+    L 710 450
+    C 707 483, 685 505, 650 505
+    L 530 505
+    C 498 505, 478 522, 462 555
+    L 395 695
+    C 383 722, 362 732, 342 722
+    C 322 712, 318 690, 328 665
+    Z
+  " fill="url(#blueGrad)"/>
+  
+  <!-- ===== TEXT ===== -->
+  
+  <!-- "Forge" in dark -->
+  <text x="195" y="838" 
+        font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" 
+        font-size="148" 
+        font-weight="900" 
+        fill="#1a2332" 
+        letter-spacing="-3">Forge</text>
+  
+  <!-- "Kit" in blue gradient -->
+  <text x="700" y="838" 
+        font-family="'Arial Black', 'Helvetica Neue', Arial, sans-serif" 
+        font-size="148" 
+        font-weight="900" 
+        fill="url(#kitGrad)" 
+        letter-spacing="-3">Kit</text>
+  
+  <!-- Tagline -->
+  <text x="540" y="918" 
+        font-family="'Arial', 'Helvetica Neue', sans-serif" 
+        font-size="44" 
+        font-weight="700" 
+        fill="#1a2332" 
+        text-anchor="middle" 
+        letter-spacing="10">ONE APP. ALL TOOLS.</text>
+</svg>
+

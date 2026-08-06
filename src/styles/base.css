@@ -1,0 +1,103 @@
+/* ============================================================
+   ForgeKit — базовые стили: reset, типографика, скроллбары
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--text);
+  background: transparent;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  overflow: hidden;
+  user-select: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--fk-accent);
+  color: var(--text-invert);
+}
+
+/* Скроллбары — тонкие, минималистичные */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Области с текстом — можно выделять */
+.selectable {
+  user-select: text;
+}
+
+/* Область перетаскивания окна */
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
+
+/* Базовые переходы — только opacity и scale */
+@keyframes fk-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fk-pop-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.fk-fade-in {
+  animation: fk-fade-in var(--t-fast) var(--t-curve);
+}
+.fk-pop-in {
+  animation: fk-pop-in var(--t-fast) var(--t-curve);
+}

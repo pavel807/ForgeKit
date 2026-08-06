@@ -1,0 +1,715 @@
+/* ============================================================
+   ForgeKit — UI-компоненты
+   Мягкий фон, тонкие серые границы, лёгкие тени, скругления 8–12px
+   ============================================================ */
+
+/* ---------- Кнопки ---------- */
+.fk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  box-shadow: var(--shadow-xs);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+  transition: background var(--t-fast) var(--t-curve), color var(--t-fast) var(--t-curve),
+    border-color var(--t-fast) var(--t-curve), box-shadow var(--t-fast) var(--t-curve);
+}
+.fk-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-medium);
+}
+.fk-btn:active {
+  background: var(--bg-active);
+}
+.fk-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.fk-btn:focus-visible {
+  box-shadow: 0 0 0 3px var(--fk-accent-soft), var(--shadow-xs);
+  border-color: var(--fk-accent);
+}
+
+.fk-btn--primary {
+  background: var(--fk-accent);
+  border-color: var(--fk-accent);
+  color: var(--text-invert);
+  box-shadow: none;
+}
+.fk-btn--primary:hover {
+  background: var(--fk-accent-hover);
+  border-color: var(--fk-accent-hover);
+}
+.fk-btn--primary:active {
+  background: var(--fk-accent-selected);
+  border-color: var(--fk-accent-selected);
+}
+
+.fk-btn--ghost {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.fk-btn--ghost:hover {
+  background: var(--bg-hover);
+  border-color: transparent;
+}
+
+.fk-btn--danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--text-invert);
+  box-shadow: none;
+}
+.fk-btn--danger:hover {
+  filter: brightness(1.08);
+}
+
+.fk-btn--sm {
+  height: 28px;
+  padding: 0 12px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+/* ---------- Иконка-кнопка ---------- */
+.fk-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  transition: background var(--t-fast) var(--t-curve), color var(--t-fast) var(--t-curve),
+    border-color var(--t-fast) var(--t-curve), box-shadow var(--t-fast) var(--t-curve);
+}
+.fk-iconbtn:hover {
+  background: var(--bg-hover);
+}
+.fk-iconbtn:active {
+  background: var(--bg-active);
+}
+.fk-iconbtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.fk-iconbtn--ghost {
+  border-color: transparent;
+  background: transparent;
+}
+.fk-iconbtn--ghost:hover {
+  background: var(--bg-hover);
+}
+.fk-iconbtn--danger:hover {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+.fk-iconbtn--active {
+  background: var(--fk-accent);
+  border-color: var(--fk-accent);
+  color: var(--text-invert);
+}
+.fk-iconbtn--active:hover {
+  background: var(--fk-accent-selected);
+}
+.fk-iconbtn--sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+/* ---------- Поля ввода ---------- */
+.fk-input {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  user-select: text;
+  transition: border-color var(--t-fast) var(--t-curve), box-shadow var(--t-fast) var(--t-curve);
+}
+.fk-input::placeholder {
+  color: var(--text-tertiary);
+}
+.fk-input:hover {
+  border-color: var(--border-medium);
+}
+.fk-input:focus {
+  border-color: var(--fk-accent);
+  box-shadow: 0 0 0 3px var(--fk-accent-soft);
+}
+.fk-input:disabled {
+  opacity: 0.5;
+}
+
+.fk-input--sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+textarea.fk-input {
+  height: auto;
+  min-height: 120px;
+  padding: 12px;
+  line-height: 1.6;
+  resize: vertical;
+  font-family: var(--font-mono, "SF Mono", ui-monospace, "Cascadia Code", Menlo, monospace);
+  font-size: 12.5px;
+}
+
+/* Многострочные поля, используемые напрямую в инструментах */
+.fk-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-mono, "SF Mono", ui-monospace, "Cascadia Code", Menlo, monospace);
+  line-height: 1.6;
+  outline: none;
+  resize: vertical;
+  user-select: text;
+  transition: border-color var(--t-fast) var(--t-curve), box-shadow var(--t-fast) var(--t-curve);
+}
+.fk-textarea::placeholder {
+  color: var(--text-tertiary);
+}
+.fk-textarea:hover {
+  border-color: var(--border-medium);
+}
+.fk-textarea:focus {
+  border-color: var(--fk-accent);
+  box-shadow: 0 0 0 3px var(--fk-accent-soft);
+}
+.fk-textarea:disabled {
+  opacity: 0.5;
+}
+
+.fk-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.fk-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ---------- Поле с поиском ---------- */
+.fk-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.fk-search .fk-search__icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+.fk-search .fk-input {
+  width: 100%;
+  padding-left: 36px;
+}
+
+/* ---------- Выпадающий список ---------- */
+.fk-select {
+  height: 36px;
+  padding: 0 34px 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color var(--t-fast) var(--t-curve), box-shadow var(--t-fast) var(--t-curve);
+}
+.fk-select:hover {
+  border-color: var(--border-medium);
+}
+.fk-select:focus {
+  border-color: var(--fk-accent);
+  box-shadow: 0 0 0 3px var(--fk-accent-soft);
+}
+
+/* ---------- Чекбокс ---------- */
+.fk-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.fk-checkbox input {
+  display: none;
+}
+.fk-checkbox__box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  color: transparent;
+  transition: background var(--t-fast) var(--t-curve), color var(--t-fast) var(--t-curve),
+    border-color var(--t-fast) var(--t-curve);
+}
+.fk-checkbox input:checked + .fk-checkbox__box {
+  background: var(--fk-accent);
+  border-color: var(--fk-accent);
+  color: var(--text-invert);
+}
+.fk-checkbox:hover .fk-checkbox__box {
+  border-color: var(--fk-accent);
+}
+
+/* ---------- Переключатель ---------- */
+.fk-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.fk-switch input {
+  display: none;
+}
+.fk-switch__track {
+  width: 38px;
+  height: 22px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  transition: background var(--t-fast) var(--t-curve), border-color var(--t-fast) var(--t-curve);
+}
+.fk-switch__track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg);
+  transition: transform var(--t-fast) var(--t-curve), background var(--t-fast) var(--t-curve),
+    border-color var(--t-fast) var(--t-curve);
+}
+.fk-switch input:checked + .fk-switch__track {
+  background: var(--fk-accent);
+  border-color: var(--fk-accent);
+}
+.fk-switch input:checked + .fk-switch__track::after {
+  transform: translateX(15px);
+  background: var(--bg);
+  border-color: transparent;
+}
+.fk-switch input:disabled + .fk-switch__track {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------- Сегментированный контрол ---------- */
+.fk-segmented {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  gap: 2px;
+}
+.fk-segmented__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--t-fast) var(--t-curve), color var(--t-fast) var(--t-curve);
+}
+.fk-segmented__btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.fk-segmented__btn--active {
+  background: var(--fk-accent);
+  color: var(--text-invert);
+}
+.fk-segmented__btn--active:hover {
+  background: var(--fk-accent-selected);
+  color: var(--text-invert);
+}
+
+/* ---------- Бейдж ---------- */
+.fk-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg);
+  white-space: nowrap;
+}
+.fk-badge--accent {
+  background: var(--fk-accent);
+  border-color: var(--fk-accent);
+  color: var(--text-invert);
+}
+.fk-badge--success {
+  background: var(--success-soft);
+  border-color: var(--success);
+  color: var(--success);
+}
+.fk-badge--danger {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* ---------- Клавиша ---------- */
+.fk-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  padding: 0 6px;
+  border: 1px solid var(--border-medium);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--bg);
+  color: var(--text-secondary);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* ---------- Подсказка ---------- */
+.fk-tooltip {
+  position: relative;
+  display: inline-flex;
+}
+.fk-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.96);
+  padding: 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  box-shadow: var(--shadow-md);
+  color: var(--text);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 60;
+  transition: opacity var(--t-fast) var(--t-curve), transform var(--t-fast) var(--t-curve);
+}
+.fk-tooltip:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* ---------- Карточка инструмента ---------- */
+.fk-card {
+  position: relative;
+  width: 280px;
+  height: 160px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--t-fast) var(--t-curve), border-color var(--t-fast) var(--t-curve),
+    box-shadow var(--t-fast) var(--t-curve);
+}
+.fk-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--fk-accent-hover);
+  box-shadow: var(--shadow-md);
+}
+.fk-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.fk-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--fk-accent);
+  background: var(--bg);
+  transition: background var(--t-fast) var(--t-curve), border-color var(--t-fast) var(--t-curve);
+}
+.fk-card:hover .fk-card__icon {
+  background: var(--fk-accent-soft);
+  border-color: var(--fk-accent);
+}
+.fk-card__open {
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--t-curve);
+}
+.fk-card:hover .fk-card__open {
+  opacity: 1;
+}
+.fk-card__title {
+  font-size: 14.5px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+.fk-card__desc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- Пустое состояние ---------- */
+.fk-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 48px 24px;
+  text-align: center;
+}
+.fk-empty__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+}
+.fk-empty__title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+.fk-empty__desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 14px;
+  max-width: 360px;
+}
+
+/* ---------- Таблица ---------- */
+.fk-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.fk-table th {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+.fk-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: middle;
+}
+.fk-table tbody tr {
+  transition: background var(--t-fast) var(--t-curve);
+}
+.fk-table tbody tr:hover {
+  background: var(--bg-hover);
+}
+.fk-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---------- Диалог ---------- */
+.fk-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.fk-dialog {
+  width: 460px;
+  max-width: calc(100vw - 48px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--bg);
+  box-shadow: var(--shadow-lg);
+  animation: fk-pop-in var(--t-fast) var(--t-curve);
+}
+.fk-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.fk-dialog__title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+.fk-dialog__body {
+  padding: 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  user-select: text;
+  max-height: 60vh;
+  overflow: auto;
+}
+.fk-dialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-soft);
+}
+
+/* ---------- Статус-бар ---------- */
+.fk-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: var(--statusbar-h);
+  padding: 0 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.fk-statusbar__left,
+.fk-statusbar__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* ---------- Тулит-поверхности ---------- */
+.fk-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  box-shadow: var(--shadow-xs);
+}
+.fk-panel__header {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---------- Прогресс-бар ---------- */
+.fk-progress {
+  height: 6px;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--bg-subtle);
+  overflow: hidden;
+}
+.fk-progress__fill {
+  height: 100%;
+  background: var(--fk-accent);
+  border-radius: 999px;
+  transition: width var(--t-fast) var(--t-curve);
+}
+
+/* ---------- Списки ---------- */
+.fk-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+.fk-list__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  transition: background var(--t-fast) var(--t-curve);
+}
+.fk-list__item:last-child {
+  border-bottom: none;
+}
+.fk-list__item:hover {
+  background: var(--bg-hover);
+}
