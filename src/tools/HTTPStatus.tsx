@@ -32,7 +32,6 @@ const STATUS_CODES: { code: number; label: string; ru: string }[] = [
 function tone(color: number): "success" | "danger" | "warning" {
   if (color < 300) return "success";
   if (color < 400) return "warning";
-  if (color < 500) return "warning";
   return "danger";
 }
 
@@ -54,7 +53,7 @@ export default function HTTPStatus() {
       <div className="http-grid">
         {filtered.map((s) => (
           <div key={s.code} className="fk-panel fk-panel--http" style={{ padding: "16px 18px", display: "flex", flexDirection: "column", gap: 6 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <span className="mono-value" style={{ fontSize: 16, fontWeight: 600 }}>{s.code}</span>
               <span className="fk-badge" data-tone={tone(s.code)}>{s.label}</span>
             </div>

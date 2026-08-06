@@ -15,6 +15,7 @@ pub struct ConvertResult {
     pub height: u32,
     pub size: u64,
     pub original: u64,
+    pub path: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -37,6 +38,7 @@ fn save(buf: &[u8], path: &str, original: u64) -> Result<ConvertResult, String> 
         height: img.height(),
         size,
         original,
+        path: path.to_string(),
     })
 }
 

@@ -1,26 +1,63 @@
 import { useState } from "react";
-import { Crop } from "lucide-react";
+import { Crop, Download } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, Input, Select } from "../components/ui";
-import { api, pickFiles } from "../core/api";
+import { api, pickFiles, pickSave } from "../core/api";
 import { formatBytes } from "../core/format";
 
 const PRESETS = [
   { value: "orig", label: "Оригинал" },
-  { value: "1920", label: "1920×1080" },
-  { value: "1280", label: "1280×720" },
-  { value: "800", label: "800×600" },
-  { value: "512", label: "512×512" },
-  { value: "256", label: "256×256" },
+  { value: "1920x1080", label: "1920×1080" },
+  { value: "1280x720", label: "1280×720" },
+  { value: "800x600", label: "800×600" },
+  { value: "512x512", label: "512×512" },
+  { value: "256x256", label: "256×256" },
   { value: "custom", label: "Свои размеры" },
 ];
+
+interface ResizeRowProps {
+  file: string;
+  ok: boolean;
+  message: string;
+  outPath: string | null;
+}
+
+function ResizeRow({ file, ok, message, outPath }: ResizeRowProps) {
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  async function download() {
+    if (!outPath) return;
+    const name = outPath.slice(outPath.lastIndexOf("/") + 1);
+    const dst = await pickSave(name, [{ name: "Изображения", extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp", "tiff"] }]);
+    if (!dst) return;
+    setSaveState("saving");
+    try {
+      await api.copyFile(outPath, dst);
+      setSaveState("saved");
+    } catch {
+      setSaveState("error");
+    }
+  }
+
+  return (
+    <div className="fk-list__item" style={{ border: "1px solid var(--border-soft)", borderRadius: "var(--radius)" }}>
+      <span className="mono-value" style={{ fontSize: 12.5, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file}</span>
+      <span style={{ fontSize: 12.5, color: ok ? "var(--success)" : "var(--danger)" }}>{message}</span>
+      {ok && outPath ? (
+        <Button variant="ghost" size="sm" leftIcon={<Download size={13} />} onClick={download} disabled={saveState === "saving"}>
+          {saveState === "saving" ? "…" : saveState === "saved" ? "Сохранено" : saveState === "error" ? "Ошибка" : "Скачать"}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
 
 export default function ImageResizer() {
   const [files, setFiles] = useState<string[]>([]);
   const [preset, setPreset] = useState("orig");
   const [w, setW] = useState("800");
   const [h, setH] = useState("600");
-  const [log, setLog] = useState<{ file: string; ok: boolean; message: string }[]>([]);
+  const [log, setLog] = useState<{ file: string; ok: boolean; message: string; outPath: string | null }[]>([]);
   const [busy, setBusy] = useState(false);
 
   async function pick() {
@@ -33,18 +70,26 @@ export default function ImageResizer() {
       return [Math.max(1, parseInt(w, 10) || 1), Math.max(1, parseInt(h, 10) || 1)];
     }
     if (preset === "orig") return [0, 0];
-    const [pw, ph] = preset.split("x");
-    return [parseInt(pw, 10), parseInt(ph, 10)];
+    const [pw, ph] = preset.toLowerCase().split("x");
+    return [Math.max(1, parseInt(pw, 10) || 1), Math.max(1, parseInt(ph, 10) || 1)];
   }
 
   async function resizeAll() {
     const [tw, th] = targetSize();
     if (tw === 0) return;
     setBusy(true);
-    const out: { file: string; ok: boolean; message: string }[] = [];
+    const out: { file: string; ok: boolean; message: string; outPath: string | null }[] = [];
     for (const f of files) {
-      const r = await api.resizeImage(f, tw, th).catch(() => null);
-      out.push({ file: f, ok: !!r, message: r ? `${r.width}×${r.height} · ${formatBytes(r.size)}` : "Ошибка изменения размера" });
+      const r = await api
+        .resizeImage(f, tw, th)
+        .then((res) => ({ ok: true as const, res }))
+        .catch((e: unknown) => ({ ok: false as const, err: String(e) }));
+      out.push({
+        file: f,
+        ok: r.ok,
+        message: r.ok ? `${r.res.width}×${r.res.height} · ${formatBytes(r.res.size)}` : `Ошибка: ${r.err}`,
+        outPath: r.ok ? r.res.path : null,
+      });
     }
     setLog(out);
     setBusy(false);
@@ -87,10 +132,7 @@ export default function ImageResizer() {
             <Button onClick={pick}>Добавить ещё</Button>
           </div>
           {log.map((r, i) => (
-            <div key={i} className="fk-list__item" style={{ border: "1px solid var(--border-soft)", borderRadius: "var(--radius)" }}>
-              <span className="mono-value" style={{ fontSize: 12.5, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.file}</span>
-              <span style={{ fontSize: 12.5, color: r.ok ? "var(--success)" : "var(--danger)" }}>{r.message}</span>
-            </div>
+            <ResizeRow key={i} file={r.file} ok={r.ok} message={r.message} outPath={r.outPath} />
           ))}
         </div>
       )}

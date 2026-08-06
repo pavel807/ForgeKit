@@ -497,6 +497,12 @@
   user-select: text;
 }
 
+/* ---------- Тёмная тема: логотип инвертируется (сам файл лого не меняется) ---------- */
+.dark .forge-mark,
+.dark .about-logo img {
+  filter: invert(1) hue-rotate(180deg);
+}
+
 /* ---------- Блоки-предпросмотры: порты, HTTP, UUID ---------- */
 .port-grid,
 .http-grid,
@@ -510,6 +516,20 @@
 }
 .http-grid .fk-panel {
   border-left: 3px solid var(--border);
+  min-width: 0;
+}
+.http-grid .fk-panel > div:first-child {
+  min-width: 0;
+}
+.http-grid .fk-badge {
+  min-width: 0;
+  max-width: 100%;
+  height: auto;
+  min-height: 20px;
+  padding: 2px 8px;
+  white-space: normal;
+  line-height: 1.5;
+  text-align: center;
 }
 .fk-badge[data-tone="success"] {
   background: var(--success-soft);

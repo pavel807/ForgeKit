@@ -1,4 +1,4 @@
-import { CATEGORIES, getTool } from "../../core/registry";
+import { CATEGORIES } from "../../core/registry";
 import { useRouter } from "../../core/Router";
 import { ForgeMark } from "../ui/art";
 import { cn } from "@/lib/utils";
@@ -36,40 +36,11 @@ export function Sidebar() {
             );
           })}
         </div>
-
-        <div className="mt-5">
-          <div className="px-3 pb-1.5 text-[11px] font-medium uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
-            Система
-          </div>
-          <div className="flex flex-col gap-0.5 mb-2">
-            {["plugins", "settings"].map((id) => {
-              const tool = getTool(id);
-              const Icon = tool.icon;
-              const active = current === id;
-              return (
-                <button
-                  key={id}
-                  onClick={() => navigate(id)}
-                  className={cn(
-                    "flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 text-[13px] font-medium transition-all duration-150",
-                    active
-                      ? "bg-primary/10 text-primary"
-                      : "text-[var(--text-secondary)] hover:bg-accent hover:text-foreground",
-                  )}
-                  title={tool.description}
-                >
-                  <Icon size={16} strokeWidth={2} />
-                  <span className="truncate">{tool.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
       </div>
 
       <div className="border-t border-border p-3">
         <div className="rounded-xl border border-border bg-muted/40 p-3.5">
-          <p className="text-[13px] font-semibold">ForgeKit 1.4.2</p>
+          <p className="text-[13px] font-semibold">ForgeKit 1.4.6</p>
           <p className="mt-0.5 text-xs leading-relaxed text-[var(--text-tertiary)]">
             40+ инструментов в одном приложении
           </p>

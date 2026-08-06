@@ -8,9 +8,10 @@ export default function IPLookup() {
   const [ip, setIp] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState<number | null>(null);
 
-  const load = useCallback(async () => {
-    setBusy(true);
+  const load = useCallback(async (showBusy = true) => {
+    if (showBusy) setBusy(true);
     setError(null);
     const r = await api.publicIp().catch((e) => String(e));
     if (typeof r === "string" && r.includes(" ")) {
@@ -19,23 +20,27 @@ export default function IPLookup() {
     } else {
       setIp(r as string);
     }
-    setBusy(false);
+    setUpdatedAt(Date.now());
+    if (showBusy) setBusy(false);
   }, []);
 
   useEffect(() => {
-    if (isTauri()) load();
+    if (!isTauri()) return;
+    load(false);
+    const interval = window.setInterval(() => load(false), 10000);
+    return () => window.clearInterval(interval);
   }, [load]);
 
   return (
     <ToolPage
       id="ip-lookup"
       actions={
-        <Button variant="primary" leftIcon={<Globe size={15} />} onClick={load} disabled={busy}>
+        <Button variant="primary" leftIcon={<Globe size={15} />} onClick={() => load()} disabled={busy}>
           {busy ? "Проверка…" : "Определить IP"}
         </Button>
       }
-      statusLeft={<span>Внешний адрес определяется через api.ipify.org</span>}
-      statusRight={ip ? <span>Обновлено только что</span> : undefined}
+      statusLeft={<span>Внешний адрес определяется через api.ipify.org · обновляется каждые 10 с</span>}
+      statusRight={ip ? <span>Обновлено: {updatedAt ? new Date(updatedAt).toLocaleTimeString("ru-RU") : "—"}</span> : undefined}
     >
       {!ip && !error ? (
         <EmptyState icon={<Globe size={24} />} title="Определение IP-адреса" description="Узнайте ваш публичный IPv4-адрес" />

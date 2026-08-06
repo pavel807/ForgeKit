@@ -87,6 +87,7 @@ export interface ConvertResult {
   height: number;
   size: number;
   original: number;
+  path: string;
 }
 
 export interface QrResult {
@@ -253,6 +254,7 @@ export const api = {
   filesOrganize: (dir: string, mode: string, dryRun: boolean) => invoke<OrganizeResult[]>("files_organize", { dir, mode, dryRun }),
   filesSizeBreakdown: (dir: string) => invoke<SizeEntry[]>("files_size_breakdown", { dir }),
   writeTextFileLocal: (path: string, content: string) => invoke<void>("write_text_file", { path, content }),
+  copyFile: (src: string, dst: string) => invoke<void>("copy_file", { src, dst }),
 
   /* --- Система --- */
   systemInfo: () => invoke<SystemInfo>("system_info"),

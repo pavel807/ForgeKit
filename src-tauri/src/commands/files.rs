@@ -290,6 +290,13 @@ pub fn write_text_file(path: String, content: String) -> Result<(), String> {
     std::fs::write(&path, content).map_err(|e| e.to_string())
 }
 
+/* Копирование файла в указанное место (используется кнопкой «Скачать») */
+#[tauri::command]
+pub fn copy_file(src: String, dst: String) -> Result<(), String> {
+    std::fs::copy(&src, &dst).map_err(|e| format!("Не удалось скопировать файл: {e}"))?;
+    Ok(())
+}
+
 fn measure(p: &Path) -> (u64, u64, u64) {
     let mut size = 0u64;
     let mut files = 0u64;

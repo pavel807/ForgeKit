@@ -1,16 +1,42 @@
-import { Star } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Download, RefreshCw, Star } from "lucide-react";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { Button } from "../components/ui";
 import { ToolPage } from "../components/layout/ToolPage";
 import { isTauri } from "../core/api";
+import { checkForUpdates, getAppVersion, type UpdateCheck } from "../core/updater";
 
 const TOOL_COUNT = 40;
 const CATEGORY_COUNT = 10;
 
 export default function About() {
+  const [version, setVersion] = useState("");
+  const [check, setCheck] = useState<UpdateCheck | null>(null);
+
+  const run = useCallback(async () => {
+    setCheck({ status: "checking", current: version, latest: null, releaseUrl: null });
+    const result = await checkForUpdates();
+    setVersion(result.current);
+    setCheck(result);
+  }, []);
+
+  useEffect(() => {
+    getAppVersion().then(setVersion);
+    checkForUpdates().then((r) => {
+      setVersion(r.current);
+      setCheck(r);
+    });
+  }, []);
+
   return (
     <ToolPage
       id="about"
+      actions={
+        <Button variant="ghost" leftIcon={<RefreshCw size={15} />} onClick={run} disabled={check?.status === "checking" || !isTauri()}>
+          {check?.status === "checking" ? "Проверка…" : "Проверить обновления"}
+        </Button>
+      }
       statusLeft={<span>Собрано с любовью и вниманием к деталям</span>}
-      statusRight={isTauri() ? <span>Нативное приложение Tauri 2</span> : <span>Предпросмотр в браузере</span>}
     >
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, paddingTop: 40 }}>
         <div className="about-logo">
@@ -26,13 +52,31 @@ export default function About() {
           ))}
         </div>
         <div style={{ display: "flex", gap: 10, fontSize: 12.5, color: "var(--text-secondary)" }}>
-          <span>Версия 1.4.2</span>
+          <span>Версия {version || "…"}</span>
           <span>·</span>
           <span>Rust + Tauri 2</span>
           <span>·</span>
           <span>React 19</span>
           <span>·</span>
           <span>SQLite</span>
+        </div>
+        <div className="fk-panel" style={{ width: "100%", maxWidth: 420, padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          {check?.status === "checking" ? (
+            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>Проверка наличия обновлений…</span>
+          ) : check?.status === "up-to-date" ? (
+            <span style={{ fontSize: 13, color: "var(--success)" }}>Актуальная версия — обновления не требуются</span>
+          ) : check?.status === "update" && check.latest ? (
+            <>
+              <span style={{ fontSize: 13, color: "var(--warning)" }}>Доступна новая версия {check.latest}</span>
+              <Button variant="primary" size="sm" leftIcon={<Download size={13} />} onClick={() => check.releaseUrl && openUrl(check.releaseUrl)}>
+                Скачать
+              </Button>
+            </>
+          ) : check?.status === "error" ? (
+            <span style={{ fontSize: 13, color: "var(--danger)" }}>Не удалось проверить обновления</span>
+          ) : (
+            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>Нажмите «Проверить обновления»</span>
+          )}
         </div>
       </div>
     </ToolPage>

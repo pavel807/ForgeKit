@@ -10,15 +10,18 @@ export default function ProcessViewer() {
   const [busy, setBusy] = useState(false);
   const [filtered, setFiltered] = useState<ProcessEntry[]>([]);
 
-  const load = useCallback(async () => {
-    setBusy(true);
+  const load = useCallback(async (showBusy = true) => {
+    if (showBusy) setBusy(true);
     const result = await api.processList().catch(() => [] as ProcessEntry[]);
     setProcs(result);
-    setBusy(false);
+    if (showBusy) setBusy(false);
   }, []);
 
   useEffect(() => {
-    if (isTauri()) load();
+    if (!isTauri()) return;
+    load(false);
+    const interval = window.setInterval(() => load(false), 2000);
+    return () => window.clearInterval(interval);
   }, [load]);
 
   useEffect(() => {
@@ -36,12 +39,12 @@ export default function ProcessViewer() {
     <ToolPage
       id="process-viewer"
       actions={
-        <Button variant="primary" leftIcon={<Cpu size={15} />} onClick={load} disabled={busy}>
+        <Button variant="primary" leftIcon={<Cpu size={15} />} onClick={() => load()} disabled={busy}>
           {busy ? "Загрузка…" : "Обновить список"}
         </Button>
       }
       toolbar={<SearchInput placeholder="Поиск по имени или PID…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ width: 280 }} />}
-      statusLeft={<span>Процессов: {procs.length} · показано: {sortProcs.length}</span>}
+      statusLeft={<span>Процессов: {procs.length} · показано: {sortProcs.length} · обновляется каждые 2 с</span>}
       statusRight={sortProcs.length > 0 ? <span>Память всего: {formatBytes(sortProcs.reduce((a, p) => a + p.mem, 0))}</span> : undefined}
     >
       {sortProcs.length === 0 ? (

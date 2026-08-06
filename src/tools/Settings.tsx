@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { Info } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { SegmentedControl } from "../components/ui";
 import { api, isTauri } from "../core/api";
 import { getTheme, setTheme, type Theme } from "../core/theme";
+import { useRouter } from "../core/Router";
 
 function SettingRow({ title, description, control }: { title: string; description: string; control: React.ReactNode }) {
   return (
@@ -17,6 +19,7 @@ function SettingRow({ title, description, control }: { title: string; descriptio
 }
 
 export default function Settings() {
+  const { navigate } = useRouter();
   const [theme, setThemeState] = useState<Theme>(() => getTheme());
   const [clipboardMonitor, setClipboardMonitor] = useState(true);
   const [clipboardLimit, setClipboardLimit] = useState("500");
@@ -88,6 +91,15 @@ export default function Settings() {
           title="Глобальный хоткей"
           description="Ctrl+Space — открыть глобальный поиск в любом приложении"
           control={<span className="fk-kbd">Ctrl</span>}
+        />
+        <SettingRow
+          title="О приложении"
+          description="Версия, проверка обновлений и информация о ForgeKit"
+          control={
+            <button className="fk-btn fk-btn--ghost fk-btn--sm" onClick={() => navigate("about")}>
+              <Info size={14} /> Открыть
+            </button>
+          }
         />
       </div>
     </ToolPage>

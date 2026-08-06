@@ -1,6 +1,6 @@
 [package]
 name = "forgekit"
-version = "1.4.2"
+version = "1.4.6"
 description = "ForgeKit — набор из 40+ профессиональных инструментов в одном приложении"
 authors = ["Pavel Labushev"]
 edition = "2021"

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { RouterProvider, useRouter } from "../../core/Router";
 import { getCategory, getTool } from "../../core/registry";
 import { isTauri } from "../../core/api";
+import { checkForUpdates, type UpdateCheck } from "../../core/updater";
 import { TopBar } from "./TopBar";
 import { Sidebar } from "./Sidebar";
 import { GlobalSearch } from "./GlobalSearch";
@@ -63,9 +64,16 @@ function Body() {
     return () => unlisten?.();
   }, []);
 
+  /* Автоматическая проверка обновлений при запуске */
+  const [updateCheck, setUpdateCheck] = useState<UpdateCheck | null>(null);
+  useEffect(() => {
+    if (!isTauri()) return;
+    checkForUpdates().then(setUpdateCheck);
+  }, []);
+
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-[16px] bg-background">
-      <TopBar onOpenSearch={() => setSearchOpen(true)} />
+      <TopBar onOpenSearch={() => setSearchOpen(true)} updateLatest={updateCheck?.status === "update" ? updateCheck.latest : null} />
       <div className="flex min-h-0 flex-1">
         <Sidebar />
         <main className="relative flex min-w-0 flex-1 flex-col bg-muted/30">

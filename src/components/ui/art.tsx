@@ -11,7 +11,7 @@ export function ForgeMark({ size = 28, className }: { size?: number; className?:
       width={size}
       height={size}
       viewBox="0 0 1080 1080"
-      className={cn("shrink-0", className)}
+      className={cn("forge-mark shrink-0", className)}
       aria-hidden
     >
       <defs>

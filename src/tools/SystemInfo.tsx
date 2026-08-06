@@ -3,7 +3,7 @@ import { MonitorCog } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, Progress } from "../components/ui";
 import { api, isTauri, type SystemInfo } from "../core/api";
-import { formatBytes } from "../core/format";
+import { formatBytesBinary } from "../core/format";
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -18,15 +18,18 @@ export default function SystemInfo() {
   const [info, setInfo] = useState<SystemInfo | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function load() {
-    setBusy(true);
+  async function load(showBusy = true) {
+    if (showBusy) setBusy(true);
     const result = await api.systemInfo().catch(() => null);
     setInfo(result);
-    setBusy(false);
+    if (showBusy) setBusy(false);
   }
 
   useEffect(() => {
-    if (isTauri()) load();
+    if (!isTauri()) return;
+    load(false);
+    const interval = window.setInterval(() => load(false), 1000);
+    return () => window.clearInterval(interval);
   }, []);
 
   const uptime = info ? `${Math.floor(info.uptime_sec / 3600)} ч ${Math.floor((info.uptime_sec % 3600) / 60)} мин` : "";
@@ -35,11 +38,11 @@ export default function SystemInfo() {
     <ToolPage
       id="system-info"
       actions={
-        <Button variant="primary" leftIcon={<MonitorCog size={15} />} onClick={load} disabled={busy}>
+        <Button variant="primary" leftIcon={<MonitorCog size={15} />} onClick={() => load()} disabled={busy}>
           {busy ? "Обновление…" : "Обновить данные"}
         </Button>
       }
-      statusLeft={<span>Данные предоставлены Rust-командой system_info</span>}
+      statusLeft={<span>Обновляется автоматически каждую секунду</span>}
       statusRight={info ? <span>ОС: {info.os_name} {info.os_version}</span> : undefined}
     >
       {!info ? (
@@ -48,7 +51,7 @@ export default function SystemInfo() {
           title="Сведения о системе"
           description="Узнайте версию ОС, характеристики и загрузку процессора и памяти"
           action={
-            <Button variant="primary" leftIcon={<MonitorCog size={15} />} onClick={load}>
+            <Button variant="primary" leftIcon={<MonitorCog size={15} />} onClick={() => load()}>
               Получить данные
             </Button>
           }
@@ -70,11 +73,11 @@ export default function SystemInfo() {
             </div>
             <Progress value={info.cpu_usage} />
             <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-tertiary)", marginTop: 16, marginBottom: 12 }}>
-              Память: {formatBytes(info.used_mem)} из {formatBytes(info.total_mem)}
+              Память: {formatBytesBinary(info.used_mem)} из {formatBytesBinary(info.total_mem)}
             </div>
             <Progress value={info.total_mem > 0 ? (info.used_mem / info.total_mem) * 100 : 0} />
             <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-tertiary)", marginTop: 16, marginBottom: 12 }}>
-              Диск: {formatBytes(info.free_disk)} свободно из {formatBytes(info.total_disk)}
+              Диск: {formatBytesBinary(info.free_disk)} свободно из {formatBytesBinary(info.total_disk)}
             </div>
             <Progress value={info.total_disk > 0 ? ((info.total_disk - info.free_disk) / info.total_disk) * 100 : 0} />
           </div>

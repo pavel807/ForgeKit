@@ -1,6 +1,7 @@
 /* Система: информация о системе и список процессов */
 
 use serde::Serialize;
+use std::path::Path;
 use sysinfo::{Disks, ProcessesToUpdate, System};
 
 #[derive(Debug, Serialize)]
@@ -29,6 +30,54 @@ pub struct ProcessEntry {
     pub state: String,
 }
 
+/* Основной диск: для каждой ОС выбираем свой.
+   - macOS: APFS-контейнер разбивается на тома, делящие свободное место,
+     поэтому берём том данных ("/System/Volumes/Data"), иначе корневой "/".
+   - Windows: системный диск из переменной окружения SystemDrive (обычно C:).
+   - Linux: корневая файловая система "/".
+   Запасной вариант — самый большой несъёмный том. */
+#[cfg(target_os = "macos")]
+fn pick_main_disk(disks: &Disks) -> Option<&sysinfo::Disk> {
+    disks
+        .list()
+        .iter()
+        .find(|d| d.mount_point() == Path::new("/System/Volumes/Data"))
+        .or_else(|| disks.list().iter().find(|d| d.mount_point() == Path::new("/")))
+        .or_else(|| fallback_disk(disks))
+}
+
+#[cfg(target_os = "windows")]
+fn pick_main_disk(disks: &Disks) -> Option<&sysinfo::Disk> {
+    let sys = std::env::var("SystemDrive").unwrap_or_else(|_| "C:".to_string());
+    disks
+        .list()
+        .iter()
+        .find(|d| d.mount_point().to_string_lossy().starts_with(&sys) || d.name().to_string_lossy().starts_with(&sys))
+        .or_else(|| fallback_disk(disks))
+}
+
+#[cfg(target_os = "linux")]
+fn pick_main_disk(disks: &Disks) -> Option<&sysinfo::Disk> {
+    disks
+        .list()
+        .iter()
+        .find(|d| d.mount_point() == Path::new("/"))
+        .or_else(|| fallback_disk(disks))
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
+fn pick_main_disk(disks: &Disks) -> Option<&sysinfo::Disk> {
+    fallback_disk(disks)
+}
+
+fn fallback_disk(disks: &Disks) -> Option<&sysinfo::Disk> {
+    disks
+        .list()
+        .iter()
+        .filter(|d| !d.is_removable() && d.total_space() >= 10 * 1024 * 1024 * 1024)
+        .max_by_key(|d| d.total_space())
+}
+
 /// Сводная информация о системе
 #[tauri::command]
 pub fn system_info() -> Result<SystemInfo, String> {
@@ -42,14 +91,7 @@ pub fn system_info() -> Result<SystemInfo, String> {
     let cpu_cores = sys.cpus().len();
     let cpu_usage = sys.global_cpu_usage();
     let disks = Disks::new_with_refreshed_list();
-    /* Основной диск: берём самый большой несъёмный том (на macOS APFS-тома
-       и внешние диски не должны суммироваться), иначе сумма всех томов
-       оказывается больше физического диска */
-    let main_disk = disks
-        .list()
-        .iter()
-        .filter(|d| !d.is_removable() && d.total_space() >= 10 * 1024 * 1024 * 1024)
-        .max_by_key(|d| d.total_space());
+    let main_disk = pick_main_disk(&disks);
     let total_disk = main_disk.map(|d| d.total_space()).unwrap_or(0);
     let free_disk = main_disk.map(|d| d.available_space()).unwrap_or(0);
 
@@ -68,6 +110,12 @@ pub fn system_info() -> Result<SystemInfo, String> {
         free_disk,
         uptime_sec: System::uptime(),
     })
+}
+
+/// Текущая версия приложения (из tauri.conf.json)
+#[tauri::command]
+pub fn get_app_version(app: tauri::AppHandle) -> String {
+    app.package_info().version.to_string()
 }
 
 fn status_str(s: &sysinfo::ProcessStatus) -> &'static str {

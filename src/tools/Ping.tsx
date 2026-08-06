@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Wifi } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, Input } from "../components/ui";
@@ -8,13 +8,23 @@ export default function Ping() {
   const [host, setHost] = useState("google.com");
   const [result, setResult] = useState<PingResult | null>(null);
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
 
   async function ping() {
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
     const r = await api.pingHost(host.trim() || "localhost").catch((e) => ({ ok: false, latency_ms: null, error: String(e) }));
     setResult(r);
+    busyRef.current = false;
     setBusy(false);
   }
+
+  useEffect(() => {
+    ping();
+    const interval = window.setInterval(ping, 2000);
+    return () => window.clearInterval(interval);
+  }, [host]);
 
   return (
     <ToolPage
@@ -25,7 +35,7 @@ export default function Ping() {
         </Button>
       }
       toolbar={<Input className="mono-value" placeholder="example.com" value={host} onChange={(e) => setHost(e.target.value)} style={{ width: 280 }} />}
-      statusLeft={<span>TCP-подключение к порту 443 — проверка доступности хоста</span>}
+      statusLeft={<span>TCP-подключение к порту 443 · пинг каждые 2 с</span>}
       statusRight={
         result ? (
           result.ok ? <span style={{ color: "var(--success)" }}>Доступен</span> : <span style={{ color: "var(--danger)" }}>Недоступен</span>

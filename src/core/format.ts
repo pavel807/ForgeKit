@@ -27,6 +27,15 @@ export function formatBytes(bytes: number): string {
   return `${val >= 10 || i === 0 ? Math.round(val) : val.toFixed(1)} ${units[i]}`;
 }
 
+/* Двоичные единицы (1024): для оперативной памяти, где 24 ГБ = 24 GiB */
+export function formatBytesBinary(bytes: number): string {
+  if (bytes === 0) return "0 ГБ";
+  const units = ["Б", "КБ", "МБ", "ГБ", "ТБ"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const val = bytes / Math.pow(1024, i);
+  return `${val >= 10 || i === 0 ? Math.round(val) : val.toFixed(1)} ${units[i]}`;
+}
+
 export function formatNumber(n: number): string {
   return n.toLocaleString("ru-RU");
 }

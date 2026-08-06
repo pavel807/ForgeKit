@@ -1,4 +1,4 @@
-import { Maximize2, Minus, X } from "lucide-react";
+import { Download, Maximize2, Minus, Puzzle, X } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { isTauri } from "../../core/api";
 import { useRouter } from "../../core/Router";
@@ -33,14 +33,22 @@ export function WindowControls() {
 
 interface TopBarProps {
   onOpenSearch: () => void;
+  updateLatest?: string | null;
 }
 
-export function TopBar({ onOpenSearch }: TopBarProps) {
+export function TopBar({ onOpenSearch, updateLatest }: TopBarProps) {
   const { navigate } = useRouter();
 
   return (
     <header className="relative z-20 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-4">
       <div className="flex shrink-0 items-center gap-1 pl-1">
+        <button
+          onClick={() => navigate("plugins")}
+          title="Плагины"
+          className="grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-accent-foreground"
+        >
+          <Puzzle size={16} />
+        </button>
         <button
           onClick={() => navigate("settings")}
           title="Настройки"
@@ -51,6 +59,16 @@ export function TopBar({ onOpenSearch }: TopBarProps) {
             <circle cx="12" cy="12" r="3" />
           </svg>
         </button>
+        {updateLatest ? (
+          <button
+            onClick={() => navigate("about")}
+            title={`Доступна версия ${updateLatest}`}
+            className="relative grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-accent-foreground"
+          >
+            <Download size={16} />
+            <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-[var(--danger)]" />
+          </button>
+        ) : null}
       </div>
 
       <div data-tauri-drag-region className="flex h-full flex-1 items-center justify-center">

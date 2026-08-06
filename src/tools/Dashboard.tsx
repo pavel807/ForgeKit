@@ -24,7 +24,10 @@ function RecentClipboard() {
 
   useEffect(() => {
     if (!isTauri()) return;
-    api.clipboardList("all", "").then((list) => setItems(list.slice(0, 5))).catch(() => {});
+    const fetchItems = () => api.clipboardList("all", "").then((list) => setItems(list.slice(0, 5))).catch(() => {});
+    fetchItems();
+    const interval = window.setInterval(fetchItems, 3000);
+    return () => window.clearInterval(interval);
   }, []);
 
   if (items.length === 0) return null;
