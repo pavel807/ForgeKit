@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (например v1.4.6)"
+        required: false
+        default: "v1.4.6"
 
 permissions:
   contents: write
@@ -62,9 +68,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: ${{ github.ref_name }}
-          releaseName: "ForgeKit ${{ github.ref_name }}"
-          releaseBody: "Автоматическая сборка по тегу ${{ github.ref_name }}.\n\nСкачайте установщик для вашей платформы."
+          tagName: ${{ inputs.tag || github.ref_name }}
+          releaseName: "ForgeKit ${{ inputs.tag || github.ref_name }}"
+          releaseBody: "Автоматическая сборка по тегу ${{ inputs.tag || github.ref_name }}.\n\nСкачайте установщик для вашей платформы."
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
