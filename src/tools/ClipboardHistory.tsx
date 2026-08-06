@@ -57,6 +57,8 @@ export default function ClipboardHistory() {
       return;
     }
     refresh();
+    const interval = window.setInterval(refresh, 1000);
+    return () => window.clearInterval(interval);
   }, [refresh]);
 
   /* Подгрузка путей к изображениям */

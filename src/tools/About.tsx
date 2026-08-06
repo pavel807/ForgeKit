@@ -26,7 +26,7 @@ export default function About() {
           ))}
         </div>
         <div style={{ display: "flex", gap: 10, fontSize: 12.5, color: "var(--text-secondary)" }}>
-          <span>Версия 1.4.1</span>
+          <span>Версия 1.4.2</span>
           <span>·</span>
           <span>Rust + Tauri 2</span>
           <span>·</span>
