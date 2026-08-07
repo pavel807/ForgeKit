@@ -7,9 +7,12 @@ import { checkForUpdates, type UpdateCheck } from "../../core/updater";
 import { TopBar } from "./TopBar";
 import { Sidebar } from "./Sidebar";
 import { GlobalSearch } from "./GlobalSearch";
+import { OnboardingTour } from "./OnboardingTour";
 import { CategoryPage } from "./CategoryPage";
 import { TooltipProvider } from "../ui/tooltip";
 import { Skeleton } from "../ui/skeleton";
+import { I18nProvider } from "../../core/i18n";
+import { isFirstDay, isTourDone, markTourDone } from "../../core/firstRun";
 
 function ToolSkeleton() {
   return (
@@ -71,6 +74,31 @@ function Body() {
     checkForUpdates().then(setUpdateCheck);
   }, []);
 
+  /* Интерактивный инструктаж при первом запуске */
+  const [tourOpen, setTourOpen] = useState(false);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [firstDay, done] = await Promise.all([isFirstDay(), isTourDone()]);
+      if (!cancelled && firstDay && !done) setTourOpen(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* Повторный показ инструктажа из настроек */
+  useEffect(() => {
+    const onShow = () => setTourOpen(true);
+    window.addEventListener("forgekit-open-tour", onShow);
+    return () => window.removeEventListener("forgekit-open-tour", onShow);
+  }, []);
+
+  const finishTour = () => {
+    setTourOpen(false);
+    void markTourDone();
+  };
+
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-[16px] bg-background">
       <TopBar onOpenSearch={() => setSearchOpen(true)} updateLatest={updateCheck?.status === "update" ? updateCheck.latest : null} />
@@ -94,16 +122,19 @@ function Body() {
         </main>
       </div>
       <GlobalSearch open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <OnboardingTour open={tourOpen} onFinish={finishTour} />
     </div>
   );
 }
 
 export function Shell() {
   return (
-    <TooltipProvider delayDuration={250}>
-      <RouterProvider>
-        <Body />
-      </RouterProvider>
-    </TooltipProvider>
+    <I18nProvider>
+      <TooltipProvider delayDuration={250}>
+        <RouterProvider>
+          <Body />
+        </RouterProvider>
+      </TooltipProvider>
+    </I18nProvider>
   );
 }

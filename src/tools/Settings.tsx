@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Info } from "lucide-react";
+import { Info, Sparkles } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { SegmentedControl } from "../components/ui";
 import { api, isTauri } from "../core/api";
 import { getTheme, setTheme, type Theme } from "../core/theme";
 import { useRouter } from "../core/Router";
+import { requestTour } from "../core/firstRun";
+import { useI18n, type Lang } from "../core/i18n";
 
 function SettingRow({ title, description, control }: { title: string; description: string; control: React.ReactNode }) {
   return (
@@ -18,8 +20,11 @@ function SettingRow({ title, description, control }: { title: string; descriptio
   );
 }
 
+const LANG_LABELS: Record<Lang, string> = { ru: "Русский", en: "English" };
+
 export default function Settings() {
   const { navigate } = useRouter();
+  const { t, lang, setLang } = useI18n();
   const [theme, setThemeState] = useState<Theme>(() => getTheme());
   const [clipboardMonitor, setClipboardMonitor] = useState(true);
   const [clipboardLimit, setClipboardLimit] = useState("500");
@@ -42,14 +47,28 @@ export default function Settings() {
   return (
     <ToolPage
       id="settings"
-      actions={<button className="fk-btn fk-btn--primary" onClick={save}>Сохранить</button>}
-      statusLeft={<span>Настройки хранятся в SQLite (app_data_dir)</span>}
-      statusRight={saved ? <span style={{ color: "var(--success)" }}>Сохранено</span> : undefined}
+      actions={<button className="fk-btn fk-btn--primary" onClick={save}>{t("set.save")}</button>}
+      statusLeft={<span>{t("set.storage")}</span>}
+      statusRight={saved ? <span style={{ color: "var(--success)" }}>{t("set.saved")}</span> : undefined}
     >
       <div className="fk-panel" style={{ padding: "8px 0" }}>
         <SettingRow
-          title="Тема оформления"
-          description="Светлая, тёмная или по настройкам системы"
+          title={t("set.language")}
+          description={t("set.languageDesc")}
+          control={
+            <SegmentedControl<Lang>
+              value={lang}
+              onChange={setLang}
+              items={[
+                { value: "ru", label: LANG_LABELS.ru },
+                { value: "en", label: LANG_LABELS.en },
+              ]}
+            />
+          }
+        />
+        <SettingRow
+          title={t("set.theme")}
+          description={t("set.themeDesc")}
           control={
             <SegmentedControl<Theme>
               value={theme}
@@ -58,16 +77,16 @@ export default function Settings() {
                 setThemeState(v);
               }}
               items={[
-                { value: "system", label: "Система" },
-                { value: "light", label: "Светлая" },
-                { value: "dark", label: "Тёмная" },
+                { value: "system", label: t("set.theme.system") },
+                { value: "light", label: t("set.theme.light") },
+                { value: "dark", label: t("set.theme.dark") },
               ]}
             />
           }
         />
         <SettingRow
-          title="Мониторинг буфера обмена"
-          description="Автоматически сохранять новые копирования в историю"
+          title={t("set.monitor")}
+          description={t("set.monitorDesc")}
           control={
             <label className="fk-switch">
               <input type="checkbox" checked={clipboardMonitor} onChange={(e) => setClipboardMonitor(e.target.checked)} />
@@ -76,8 +95,8 @@ export default function Settings() {
           }
         />
         <SettingRow
-          title="Лимит истории буфера"
-          description="Максимальное количество записей, хранимых в базе"
+          title={t("set.limit")}
+          description={t("set.limitDesc")}
           control={
             <input
               className="fk-input fk-input--sm mono-value"
@@ -88,16 +107,25 @@ export default function Settings() {
           }
         />
         <SettingRow
-          title="Глобальный хоткей"
-          description="Ctrl+Space — открыть глобальный поиск в любом приложении"
+          title={t("set.hotkey")}
+          description={t("set.hotkeyDesc")}
           control={<span className="fk-kbd">Ctrl</span>}
         />
         <SettingRow
-          title="О приложении"
-          description="Версия, проверка обновлений и информация о ForgeKit"
+          title={t("set.onboarding")}
+          description={t("set.onboardingDesc")}
+          control={
+            <button className="fk-btn fk-btn--ghost fk-btn--sm" onClick={requestTour}>
+              <Sparkles size={14} /> {t("set.show")}
+            </button>
+          }
+        />
+        <SettingRow
+          title={t("set.about")}
+          description={t("set.aboutDesc")}
           control={
             <button className="fk-btn fk-btn--ghost fk-btn--sm" onClick={() => navigate("about")}>
-              <Info size={14} /> Открыть
+              <Info size={14} /> {t("set.open")}
             </button>
           }
         />

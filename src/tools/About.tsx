@@ -5,6 +5,7 @@ import { Button } from "../components/ui";
 import { ToolPage } from "../components/layout/ToolPage";
 import { isTauri } from "../core/api";
 import { checkForUpdates, getAppVersion, type UpdateCheck } from "../core/updater";
+import { useI18n } from "../core/i18n";
 
 const TOOL_COUNT = 40;
 const CATEGORY_COUNT = 10;
@@ -12,6 +13,7 @@ const CATEGORY_COUNT = 10;
 export default function About() {
   const [version, setVersion] = useState("");
   const [check, setCheck] = useState<UpdateCheck | null>(null);
+  const { t } = useI18n();
 
   const run = useCallback(async () => {
     setCheck({ status: "checking", current: version, latest: null, releaseUrl: null });
@@ -33,10 +35,10 @@ export default function About() {
       id="about"
       actions={
         <Button variant="ghost" leftIcon={<RefreshCw size={15} />} onClick={run} disabled={check?.status === "checking" || !isTauri()}>
-          {check?.status === "checking" ? "Проверка…" : "Проверить обновления"}
+          {check?.status === "checking" ? t("about.checking") : t("about.check")}
         </Button>
       }
-      statusLeft={<span>Собрано с любовью и вниманием к деталям</span>}
+      statusLeft={<span>{t("about.love")}</span>}
     >
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 18, paddingTop: 40 }}>
         <div className="about-logo">
@@ -44,7 +46,7 @@ export default function About() {
         </div>
         <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 4 }}>
           <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em" }}>ForgeKit</div>
-          <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>Более {TOOL_COUNT} инструментов в {CATEGORY_COUNT} категориях</div>
+          <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>{t("about.stats", { t: TOOL_COUNT, c: CATEGORY_COUNT })}</div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {[0, 1, 2, 3, 4].map((i) => (
@@ -52,7 +54,7 @@ export default function About() {
           ))}
         </div>
         <div style={{ display: "flex", gap: 10, fontSize: 12.5, color: "var(--text-secondary)" }}>
-          <span>Версия {version || "…"}</span>
+          <span>{t("about.version", { v: version || "…" })}</span>
           <span>·</span>
           <span>Rust + Tauri 2</span>
           <span>·</span>
@@ -62,20 +64,20 @@ export default function About() {
         </div>
         <div className="fk-panel" style={{ width: "100%", maxWidth: 420, padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
           {check?.status === "checking" ? (
-            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>Проверка наличия обновлений…</span>
+            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>{t("about.checkingUpd")}</span>
           ) : check?.status === "up-to-date" ? (
-            <span style={{ fontSize: 13, color: "var(--success)" }}>Актуальная версия — обновления не требуются</span>
+            <span style={{ fontSize: 13, color: "var(--success)" }}>{t("about.upToDate")}</span>
           ) : check?.status === "update" && check.latest ? (
             <>
-              <span style={{ fontSize: 13, color: "var(--warning)" }}>Доступна новая версия {check.latest}</span>
+              <span style={{ fontSize: 13, color: "var(--warning)" }}>{t("about.newVersion", { v: check.latest })}</span>
               <Button variant="primary" size="sm" leftIcon={<Download size={13} />} onClick={() => check.releaseUrl && openUrl(check.releaseUrl)}>
-                Скачать
+                {t("about.download")}
               </Button>
             </>
           ) : check?.status === "error" ? (
-            <span style={{ fontSize: 13, color: "var(--danger)" }}>Не удалось проверить обновления</span>
+            <span style={{ fontSize: 13, color: "var(--danger)" }}>{t("about.error")}</span>
           ) : (
-            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>Нажмите «Проверить обновления»</span>
+            <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>{t("about.hint")}</span>
           )}
         </div>
       </div>

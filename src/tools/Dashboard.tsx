@@ -4,6 +4,8 @@ import { FEATURED_TOOLS } from "../core/registry";
 import { useRouter } from "../core/Router";
 import { api, isTauri, type ClipboardItem } from "../core/api";
 import { formatRelativeTime } from "../core/format";
+import { isFirstDay } from "../core/firstRun";
+import { useI18n } from "../core/i18n";
 import { Button } from "../components/ui";
 import { ToolCard } from "../components/layout/ToolCard";
 import { HeroArt } from "../components/ui/art";
@@ -21,6 +23,7 @@ function QuickActions() {
 function RecentClipboard() {
   const [items, setItems] = useState<ClipboardItem[]>([]);
   const { navigate } = useRouter();
+  const { t, lang } = useI18n();
 
   useEffect(() => {
     if (!isTauri()) return;
@@ -35,9 +38,9 @@ function RecentClipboard() {
   return (
     <section className="mt-10">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-muted-foreground">Недавние элементы буфера обмена</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground">{t("dash.recentClipboard")}</h2>
         <Button variant="ghost" size="sm" onClick={() => navigate("clipboard")}>
-          Все записи
+          {t("dash.allRecords")}
           <ArrowRight size={13} />
         </Button>
       </div>
@@ -52,11 +55,11 @@ function RecentClipboard() {
               <ClipboardList size={15} />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] font-medium">{it.preview || "Изображение"}</span>
-              <span className="block text-xs text-muted-foreground">{formatRelativeTime(it.created_at)}</span>
+              <span className="block truncate text-[13px] font-medium">{it.preview || t("kind.image")}</span>
+              <span className="block text-xs text-muted-foreground">{formatRelativeTime(it.created_at, lang)}</span>
             </span>
             <span className="shrink-0 text-xs text-muted-foreground">
-              {it.kind === "image" ? "Изображение" : it.kind === "link" ? "Ссылка" : "Текст"}
+              {it.kind === "image" ? t("kind.image") : it.kind === "link" ? t("kind.link") : t("kind.text")}
             </span>
           </button>
         ))}
@@ -66,21 +69,32 @@ function RecentClipboard() {
 }
 
 export default function Dashboard() {
+  const [firstDay, setFirstDay] = useState(false);
+  const { t } = useI18n();
+
+  useEffect(() => {
+    let cancelled = false;
+    isFirstDay().then((d) => !cancelled && setFirstDay(d));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto w-full max-w-[1100px] px-8 py-12">
         <div className="flex items-start justify-between gap-8">
           <div className="min-w-0 pt-2">
-            <h1 className="text-3xl font-semibold tracking-tight">С возвращением</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">{firstDay ? t("dash.welcomeFirst") : t("dash.welcomeBack")}</h1>
             <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-              Выберите инструмент, чтобы начать работу. Все инструменты доступны в один клик.
+              {firstDay ? t("dash.subFirst") : t("dash.subBack")}
             </p>
           </div>
           <HeroArt className="hidden xl:block" />
         </div>
 
         <section className="mt-10">
-          <h2 className="mb-4 text-sm font-semibold text-muted-foreground">Быстрые действия</h2>
+          <h2 className="mb-4 text-sm font-semibold text-muted-foreground">{t("dash.quickActions")}</h2>
           <QuickActions />
         </section>
 

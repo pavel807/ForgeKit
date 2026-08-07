@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Command, Search } from "lucide-react";
 import { TOOLS, getTool } from "../../core/registry";
 import { useRouter } from "../../core/Router";
+import { useI18n } from "../../core/i18n";
 import { fuzzySearch } from "../../core/search";
 import { isTauri } from "../../core/api";
 import { cn } from "@/lib/utils";
@@ -12,20 +13,17 @@ interface GlobalSearchProps {
   onClose: () => void;
 }
 
-const searchableTools = TOOLS.map((t) => ({
-  id: t.id,
-  name: t.name,
-  description: t.description,
-  keywords: t.keywords,
-  category: t.category,
-  categoryName: t.categoryName,
-}));
-
 export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
   const { navigate } = useRouter();
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const searchableTools = useMemo(
+    () => TOOLS.map((t2) => ({ id: t2.id, name: t(t2.name), description: t(t2.description), keywords: t2.keywords, category: t2.category, categoryName: t(t2.categoryName) })),
+    [t],
+  );
 
   useEffect(() => {
     if (open) {
@@ -62,7 +60,7 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
           <input
             ref={inputRef}
             className="h-full flex-1 bg-transparent text-[15px] text-popover-foreground outline-none placeholder:text-muted-foreground"
-            placeholder="Поиск инструментов…"
+            placeholder={t("app.searchPlaceholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -88,8 +86,8 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                 <path d="M31 31 42 42" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                 <path d="M21 15.5v11M15.5 21h11" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" opacity="0.7" />
               </svg>
-              <div className="text-sm font-medium text-popover-foreground">Ничего не найдено</div>
-              <div className="text-[13px] text-muted-foreground">По запросу «{query}» ничего не нашлось</div>
+              <div className="text-sm font-medium text-popover-foreground">{t("search.noResults")}</div>
+              <div className="text-[13px] text-muted-foreground">{t("search.noResultsFor", { q: query })}</div>
             </div>
           ) : (
             results.map((r, i) => {
@@ -128,11 +126,11 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
           <span className="flex items-center gap-1.5">
             <Kbd>↑</Kbd>
             <Kbd>↓</Kbd>
-            навигация
+            {t("search.navigate")}
           </span>
           <span className="flex items-center gap-1.5">
             <Kbd>Enter</Kbd>
-            открыть
+            {t("search.open")}
           </span>
           {isTauri() && (
             <span className="ml-auto flex items-center gap-1.5">
@@ -142,7 +140,7 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
           )}
           <span className="flex items-center gap-1.5">
             <Kbd>Esc</Kbd>
-            закрыть
+            {t("search.close")}
           </span>
         </div>
       </div>

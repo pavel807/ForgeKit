@@ -2,6 +2,7 @@ import { Download, Maximize2, Minus, Puzzle, X } from "lucide-react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { isTauri } from "../../core/api";
 import { useRouter } from "../../core/Router";
+import { useI18n } from "../../core/i18n";
 import { cn } from "@/lib/utils";
 
 const winBtn = cn(
@@ -11,18 +12,19 @@ const winBtn = cn(
 
 export function WindowControls() {
   if (!isTauri()) return null;
+  const { t } = useI18n();
   return (
     <div className="flex shrink-0 items-center gap-1" aria-label="Управление окном">
-      <button type="button" className={winBtn} title="Свернуть" onClick={() => getCurrentWindow().minimize()}>
+      <button type="button" className={winBtn} title={t("app.minimize")} onClick={() => getCurrentWindow().minimize()}>
         <Minus size={15} />
       </button>
-      <button type="button" className={winBtn} title="Развернуть / восстановить" onClick={() => getCurrentWindow().toggleMaximize()}>
+      <button type="button" className={winBtn} title={t("app.maximize")} onClick={() => getCurrentWindow().toggleMaximize()}>
         <Maximize2 size={14} />
       </button>
       <button
         type="button"
         className={cn(winBtn, "hover:bg-destructive/10 hover:text-destructive")}
-        title="Закрыть"
+        title={t("app.close")}
         onClick={() => getCurrentWindow().close()}
       >
         <X size={16} />
@@ -38,20 +40,21 @@ interface TopBarProps {
 
 export function TopBar({ onOpenSearch, updateLatest }: TopBarProps) {
   const { navigate } = useRouter();
+  const { t } = useI18n();
 
   return (
     <header className="relative z-20 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-4">
-      <div className="flex shrink-0 items-center gap-1 pl-1">
+      <div className="flex shrink-0 items-center gap-1 pl-1" data-tour="top-actions">
         <button
           onClick={() => navigate("plugins")}
-          title="Плагины"
+          title={t("app.plugins")}
           className="grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-accent-foreground"
         >
           <Puzzle size={16} />
         </button>
         <button
           onClick={() => navigate("settings")}
-          title="Настройки"
+          title={t("app.settings")}
           className="grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-accent-foreground"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -62,7 +65,7 @@ export function TopBar({ onOpenSearch, updateLatest }: TopBarProps) {
         {updateLatest ? (
           <button
             onClick={() => navigate("about")}
-            title={`Доступна версия ${updateLatest}`}
+            title={t("app.updateAvailable", { v: updateLatest })}
             className="relative grid size-9 place-items-center rounded-lg text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-accent-foreground"
           >
             <Download size={16} />
@@ -74,13 +77,14 @@ export function TopBar({ onOpenSearch, updateLatest }: TopBarProps) {
       <div data-tauri-drag-region className="flex h-full flex-1 items-center justify-center">
         <button
           onClick={onOpenSearch}
+          data-tour="search"
           className="group flex h-9 w-full max-w-md cursor-pointer items-center gap-2.5 rounded-lg border border-border bg-muted/40 px-3 text-sm text-muted-foreground transition-colors duration-150 hover:border-primary/40 hover:bg-muted/70 hover:text-foreground"
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
           </svg>
-          <span className="flex-1 text-left">Поиск инструментов…</span>
+          <span className="flex-1 text-left">{t("app.searchPlaceholder")}</span>
           <kbd className="flex items-center gap-0.5 font-mono text-[11px] text-muted-foreground">
             <span className="rounded-[5px] border border-border bg-background px-1.5 py-0.5 shadow-xs">⌘</span>
             <span className="rounded-[5px] border border-border bg-background px-1.5 py-0.5 shadow-xs">K</span>

@@ -3,33 +3,18 @@ import { ClipboardList, ClipboardX, FileText, Image as ImageIcon, Link2, Pin, Pi
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { api, isTauri, type ClipboardItem } from "../core/api";
 import { formatRelativeTime } from "../core/format";
+import { useI18n } from "../core/i18n";
 import { EmptyState, IconButton, SearchInput, SegmentedControl } from "../components/ui";
 import { ToolPage } from "../components/layout/ToolPage";
 import { notifyForgekitCopy } from "../core/clipboard";
 
 type Filter = "all" | "text" | "link" | "image" | "favorites" | "pinned";
 
-const FILTERS: { value: Filter; label: string }[] = [
-  { value: "all", label: "Все" },
-  { value: "text", label: "Текст" },
-  { value: "link", label: "Ссылки" },
-  { value: "image", label: "Изображения" },
-  { value: "favorites", label: "Избранное" },
-  { value: "pinned", label: "Закреплённые" },
-];
-
 function KindIcon({ kind }: { kind: string }) {
   if (kind === "image") return <ImageIcon size={16} />;
   if (kind === "link") return <Link2 size={16} />;
   if (kind === "code") return <FileText size={16} />;
   return <ClipboardList size={16} />;
-}
-
-function kindLabel(kind: string): string {
-  if (kind === "image") return "Изображение";
-  if (kind === "link") return "Ссылка";
-  if (kind === "code") return "Код";
-  return "Текст";
 }
 
 export default function ClipboardHistory() {
@@ -40,6 +25,23 @@ export default function ClipboardHistory() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [imageSrcs, setImageSrcs] = useState<Record<number, string>>({});
   const timerRef = useRef<number | null>(null);
+  const { t, lang } = useI18n();
+
+  const FILTERS: { value: Filter; label: string }[] = [
+    { value: "all", label: t("clip.filter.all") },
+    { value: "text", label: t("clip.filter.text") },
+    { value: "link", label: t("clip.filter.link") },
+    { value: "image", label: t("clip.filter.image") },
+    { value: "favorites", label: t("clip.filter.favorites") },
+    { value: "pinned", label: t("clip.filter.pinned") },
+  ];
+
+  const kindLabel = (kind: string): string => {
+    if (kind === "image") return t("kind.image");
+    if (kind === "link") return t("kind.link");
+    if (kind === "code") return t("kind.code");
+    return t("kind.text");
+  };
 
   const refresh = useCallback(async () => {
     try {
@@ -116,34 +118,34 @@ export default function ClipboardHistory() {
       id="clipboard"
       toolbar={
         <>
-          <SearchInput placeholder="Поиск по истории…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ width: 280 }} />
+          <SearchInput placeholder={t("clip.search")} value={query} onChange={(e) => setQuery(e.target.value)} style={{ width: 280 }} />
           <div className="spacer" />
           <SegmentedControl value={filter} onChange={setFilter} items={FILTERS} />
         </>
       }
-      statusLeft={<span>{loaded ? `Записей: ${items.length}` : "Загрузка…"}</span>}
+      statusLeft={<span>{loaded ? t("clip.count", { n: items.length }) : t("clip.loading")}</span>}
       statusRight={
         <button
           className="fk-btn fk-btn--ghost fk-btn--sm"
           onClick={async () => {
-            if (window.confirm("Очистить всю историю буфера обмена?")) {
+            if (window.confirm(t("clip.clearConfirm"))) {
               await api.clipboardClear().catch(() => {});
               refresh();
             }
           }}
         >
-          Очистить историю
+          {t("clip.clear")}
         </button>
       }
     >
       {!loaded ? null : items.length === 0 ? (
         <EmptyState
           icon={<ClipboardX size={24} />}
-          title={query || filter !== "all" ? "Ничего не найдено" : "История пуста"}
+          title={query || filter !== "all" ? t("clip.noResultsTitle") : t("clip.emptyTitle")}
           description={
             query || filter !== "all"
-              ? "Попробуйте изменить запрос или фильтр"
-              : "Скопируйте любой текст, ссылку или изображение — ForgeKit сохранит их здесь автоматически"
+              ? t("clip.noResultsDesc")
+              : t("clip.emptyDesc")
           }
         />
       ) : (
@@ -167,14 +169,14 @@ export default function ClipboardHistory() {
                       {item.kind === "link" ? (
                         <span style={{ color: "var(--fk-accent)" }}>{item.preview}</span>
                       ) : (
-                        item.preview || "Изображение"
+                        item.preview || t("kind.image")
                       )}
                     </div>
                     <div className="clip-item__time">
                       {copiedId === item.id ? (
-                        <span style={{ color: "var(--success)" }}>Скопировано в буфер</span>
+                        <span style={{ color: "var(--success)" }}>{t("clip.copied")}</span>
                       ) : (
-                        formatRelativeTime(item.created_at)
+                        formatRelativeTime(item.created_at, lang)
                       )}
                     </div>
                   </div>
@@ -185,7 +187,7 @@ export default function ClipboardHistory() {
                 <IconButton
                   size="sm"
                   variant={item.pinned ? "active" : "ghost"}
-                  tooltip={item.pinned ? "Открепить" : "Закрепить"}
+                  tooltip={item.pinned ? t("clip.unpin") : t("clip.pin")}
                   onClick={() => togglePin(item)}
                 >
                   {item.pinned ? <PinOff size={14} /> : <Pin size={14} />}
@@ -193,12 +195,12 @@ export default function ClipboardHistory() {
                 <IconButton
                   size="sm"
                   variant={item.favorite ? "active" : "ghost"}
-                  tooltip={item.favorite ? "Убрать из избранного" : "В избранное"}
+                  tooltip={item.favorite ? t("clip.unfavorite") : t("clip.favorite")}
                   onClick={() => toggleFavorite(item)}
                 >
                   <Star size={14} />
                 </IconButton>
-                <IconButton size="sm" variant="danger" tooltip="Удалить" onClick={() => remove(item)}>
+                <IconButton size="sm" variant="danger" tooltip={t("clip.delete")} onClick={() => remove(item)}>
                   <Trash2 size={14} />
                 </IconButton>
               </div>

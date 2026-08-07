@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Puzzle, Unplug } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, SearchInput } from "../components/ui";
+import { useI18n } from "../core/i18n";
 
 interface PluginInfo {
   id: string;
@@ -13,27 +14,28 @@ interface PluginInfo {
 }
 
 const PLUGINS: PluginInfo[] = [
-  { id: "clipboard-manager", name: "Clipboard Manager", description: "История и восстановление буфера обмена", author: "ForgeKit", version: "2.3.2", installed: true },
-  { id: "global-shortcut", name: "Global Shortcut", description: "Глобальный хоткей Ctrl+Space", author: "ForgeKit", version: "2.3.2", installed: true },
-  { id: "dialog", name: "Dialog", description: "Системные диалоги выбора файлов", author: "ForgeKit", version: "2.7.2", installed: true },
-  { id: "opener", name: "Opener", description: "Открытие ссылок во внешнем браузере", author: "ForgeKit", version: "2.5.0", installed: true },
+  { id: "clipboard-manager", name: "Clipboard Manager", description: "plg.desc.clipboard-manager", author: "ForgeKit", version: "2.3.2", installed: true },
+  { id: "global-shortcut", name: "Global Shortcut", description: "plg.desc.global-shortcut", author: "ForgeKit", version: "2.3.2", installed: true },
+  { id: "dialog", name: "Dialog", description: "plg.desc.dialog", author: "ForgeKit", version: "2.7.2", installed: true },
+  { id: "opener", name: "Opener", description: "plg.desc.opener", author: "ForgeKit", version: "2.5.0", installed: true },
 ];
 
 export default function Plugins() {
   const [query, setQuery] = useState("");
+  const { t } = useI18n();
   const filtered = PLUGINS.filter(
-    (p) => !query.trim() || p.name.toLowerCase().includes(query.toLowerCase()) || p.description.toLowerCase().includes(query.toLowerCase()),
+    (p) => !query.trim() || p.name.toLowerCase().includes(query.toLowerCase()) || t(p.description).toLowerCase().includes(query.toLowerCase()),
   );
 
   return (
     <ToolPage
       id="plugins"
-      toolbar={<SearchInput placeholder="Поиск плагинов…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ width: 280 }} />}
-      statusLeft={<span>Плагины — это модули расширения ForgeKit</span>}
-      statusRight={<span>Установлено: {PLUGINS.filter((p) => p.installed).length} из {PLUGINS.length}</span>}
+      toolbar={<SearchInput placeholder={t("plg.search")} value={query} onChange={(e) => setQuery(e.target.value)} style={{ width: 280 }} />}
+      statusLeft={<span>{t("plg.statusLeft")}</span>}
+      statusRight={<span>{t("plg.installed", { a: PLUGINS.filter((p) => p.installed).length, b: PLUGINS.length })}</span>}
     >
       {filtered.length === 0 ? (
-        <EmptyState icon={<Puzzle size={24} />} title="Плагины не найдены" description="Попробуйте изменить запрос" />
+        <EmptyState icon={<Puzzle size={24} />} title={t("plg.none")} description={t("plg.noneDesc")} />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {filtered.map((p) => (
@@ -44,13 +46,13 @@ export default function Plugins() {
                   <span style={{ fontWeight: 600, fontSize: 13.5 }}>{p.name}</span>
                   <span style={{ fontSize: 11.5, color: "var(--text-tertiary)" }}>v{p.version}</span>
                 </div>
-                <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>{p.description}</div>
+                <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>{t(p.description)}</div>
               </div>
               <span style={{ fontSize: 11.5, color: "var(--text-tertiary)" }}>{p.author}</span>
               {p.installed ? (
-                <span className="fk-badge fk-badge--success">Установлен</span>
+                <span className="fk-badge fk-badge--success">{t("plg.installedBadge")}</span>
               ) : (
-                <Button size="sm" leftIcon={<Unplug size={13} />}>Установить</Button>
+                <Button size="sm" leftIcon={<Unplug size={13} />}>{t("plg.install")}</Button>
               )}
             </div>
           ))}

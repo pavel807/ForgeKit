@@ -1,22 +1,32 @@
 /* Форматирование: время, размер, числа */
 
-export function formatRelativeTime(ts: number): string {
+import type { Lang } from "./i18n";
+
+const REL = {
+  ru: { just: "только что", sec: "сек. назад", min: "мин. назад", hour: "ч. назад", yesterday: "вчера", days: "дн. назад" },
+  en: { just: "just now", sec: "s ago", min: "min ago", hour: "h ago", yesterday: "yesterday", days: "d ago" },
+} as const;
+
+const locale = (lang: Lang) => (lang === "en" ? "en-US" : "ru-RU");
+
+export function formatRelativeTime(ts: number, lang: Lang = "ru"): string {
   const diff = Date.now() - ts;
   const s = Math.floor(diff / 1000);
-  if (s < 10) return "только что";
-  if (s < 60) return `${s} сек. назад`;
+  const loc = REL[lang];
+  if (s < 10) return loc.just;
+  if (s < 60) return `${s} ${loc.sec}`;
   const m = Math.floor(s / 60);
-  if (m < 60) return `${m} мин. назад`;
+  if (m < 60) return `${m} ${loc.min}`;
   const h = Math.floor(m / 60);
-  if (h < 24) return `${h} ч. назад`;
+  if (h < 24) return `${h} ${loc.hour}`;
   const d = Math.floor(h / 24);
-  if (d < 7) return d === 1 ? "вчера" : `${d} дн. назад`;
+  if (d < 7) return d === 1 ? loc.yesterday : `${d} ${loc.days}`;
   const date = new Date(ts);
-  return date.toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" });
+  return date.toLocaleDateString(locale(lang), { day: "numeric", month: "short", year: "numeric" });
 }
 
-export function formatDateTime(ts: number): string {
-  return new Date(ts).toLocaleString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+export function formatDateTime(ts: number, lang: Lang = "ru"): string {
+  return new Date(ts).toLocaleString(locale(lang), { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
 export function formatBytes(bytes: number): string {

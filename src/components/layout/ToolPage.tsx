@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { getTool } from "../../core/registry";
 import { useRouter } from "../../core/Router";
+import { useI18n } from "../../core/i18n";
 import { StatusBar } from "../ui";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "../ui/breadcrumb";
 import { HeaderIcon } from "./HeaderIcon";
@@ -19,6 +20,7 @@ export function ToolPage({ id, toolbar, actions, statusLeft, statusRight, childr
   const tool = getTool(id);
   const Icon = tool.icon;
   const { navigate } = useRouter();
+  const { t } = useI18n();
   return (
     <div className="flex h-full min-h-0 flex-col">
       <header className="flex shrink-0 items-center gap-4 border-b border-border bg-background px-8 py-5">
@@ -28,23 +30,23 @@ export function ToolPage({ id, toolbar, actions, statusLeft, statusRight, childr
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink className="text-xs text-muted-foreground" onClick={() => navigate("dashboard")}>
-                  Инструменты
+                  {t("app.tools")}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbLink className="text-xs text-muted-foreground" onClick={() => navigate(tool.category)}>
-                  {tool.categoryName}
+                  {t(tool.categoryName)}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage className="text-xs">{tool.name}</BreadcrumbPage>
+                <BreadcrumbPage className="text-xs">{t(tool.name)}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h1 className="text-lg font-semibold leading-tight tracking-tight">{tool.name}</h1>
-          <p className="mt-0.5 truncate text-[13px] text-muted-foreground">{tool.description}</p>
+          <h1 className="text-lg font-semibold leading-tight tracking-tight">{t(tool.name)}</h1>
+          <p className="mt-0.5 truncate text-[13px] text-muted-foreground">{t(tool.description)}</p>
         </div>
         {actions && <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>}
       </header>
@@ -54,7 +56,7 @@ export function ToolPage({ id, toolbar, actions, statusLeft, statusRight, childr
         </div>
       )}
       <div className="min-h-0 flex-1 overflow-y-auto p-8">{children}</div>
-      <StatusBar left={statusLeft ?? <span>Готово</span>} right={statusRight} />
+      <StatusBar left={statusLeft ?? <span>{t("app.ready")}</span>} right={statusRight} />
     </div>
   );
 }

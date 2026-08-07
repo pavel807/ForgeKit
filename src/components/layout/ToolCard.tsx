@@ -1,10 +1,12 @@
 import { ArrowRight } from "lucide-react";
 import { getTool } from "../../core/registry";
 import { useRouter } from "../../core/Router";
+import { useI18n } from "../../core/i18n";
 import { cn } from "@/lib/utils";
 
 export function ToolCard({ id }: { id: string }) {
   const { navigate } = useRouter();
+  const { t } = useI18n();
   const tool = getTool(id);
   const Icon = tool.icon;
   return (
@@ -25,8 +27,8 @@ export function ToolCard({ id }: { id: string }) {
         />
       </div>
       <span>
-        <span className="block text-sm font-semibold">{tool.name}</span>
-        <span className="mt-1 block text-[12.5px] leading-relaxed text-muted-foreground">{tool.description}</span>
+        <span className="block text-sm font-semibold">{t(tool.name)}</span>
+        <span className="mt-1 block text-[12.5px] leading-relaxed text-muted-foreground">{t(tool.description)}</span>
       </span>
     </button>
   );
