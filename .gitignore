@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Сертификаты и ключи — не коммитить
+*.p12
+*.pfx
+*.pem
+*.key
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
