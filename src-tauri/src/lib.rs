@@ -2,6 +2,8 @@ mod commands;
 mod db;
 
 use db::AppDb;
+use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
 use tauri::{Emitter, Manager};
 use tauri_plugin_global_shortcut::ShortcutState;
 
@@ -77,7 +79,13 @@ pub fn run() {
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
             let conn = db::open(dir)?;
+            let monitor_on = db::get_setting(&conn, "clipboard_monitor")
+                .ok()
+                .flatten()
+                .map(|v| v != "false")
+                .unwrap_or(true);
             app.manage(AppDb::new(conn));
+            app.manage(commands::clipboard::MonitorEnabled(Arc::new(AtomicBool::new(monitor_on))));
             #[cfg(not(mobile))]
             let _ = commands::clipboard::start_monitor(app.handle().clone());
             #[cfg(desktop)]
@@ -95,6 +103,7 @@ pub fn run() {
             commands::clipboard::clipboard_restore,
             commands::clipboard::clipboard_store_text,
             commands::clipboard::clipboard_store_image,
+            commands::clipboard::clipboard_monitor_set_enabled,
             commands::developer::hash_string,
             commands::compute::text_count,
             commands::compute::case_convert,

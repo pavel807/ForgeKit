@@ -4,8 +4,10 @@ import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState } from "../components/ui";
 import { api, pickDirectory, type DuplicateGroup } from "../core/api";
 import { formatBytes } from "../core/format";
+import { useI18n } from "../core/i18n";
 
 export default function DuplicateFinder() {
+  const { t } = useI18n();
   const [dir, setDir] = useState<string | null>(null);
   const [groups, setGroups] = useState<DuplicateGroup[]>([]);
   const [scanning, setScanning] = useState(false);
@@ -35,7 +37,7 @@ export default function DuplicateFinder() {
       id="duplicate-finder"
       actions={
         <Button variant="primary" leftIcon={<Search size={15} />} onClick={scan} disabled={scanning}>
-          {scanning ? "Сканирование…" : "Сканировать папку"}
+          {scanning ? t("dup.scanning") : t("dup.scan")}
         </Button>
       }
       statusLeft={
@@ -44,13 +46,13 @@ export default function DuplicateFinder() {
             {dir}
           </span>
         ) : (
-          <span>Папка не выбрана</span>
+          <span>{t("dup.noFolder")}</span>
         )
       }
       statusRight={
         groups.length > 0 ? (
           <span>
-            Дубликатов: {duplicateFiles} · можно освободить {formatBytes(wastedSpace)}
+            {t("dup.stats", { files: duplicateFiles, size: formatBytes(wastedSpace) })}
           </span>
         ) : undefined
       }
@@ -60,11 +62,11 @@ export default function DuplicateFinder() {
       {groups.length === 0 && !scanning ? (
         <EmptyState
           icon={<Files size={24} />}
-          title="Поиск дубликатов"
-          description="Выберите папку, и ForgeKit найдёт повторяющиеся файлы, сравнив их содержимое по хэшу"
+          title={t("dup.emptyTitle")}
+          description={t("dup.emptyDesc")}
           action={
             <Button variant="primary" leftIcon={<FolderOpen size={15} />} onClick={scan}>
-              Выбрать папку
+              {t("dup.pickFolder")}
             </Button>
           }
         />
@@ -73,7 +75,7 @@ export default function DuplicateFinder() {
           {groups.slice(0, 50).map((g, i) => (
             <div className="fk-panel" key={i}>
               <div className="fk-panel__header">
-                Группа {i + 1} · {g.items.length} файла · {formatBytes(g.size)} каждый
+                {t("dup.group", { i: i + 1, n: g.items.length, size: formatBytes(g.size) })}
               </div>
               <div>
                 {g.items.map((f) => (
@@ -88,7 +90,7 @@ export default function DuplicateFinder() {
           ))}
           {groups.length > 50 && (
             <div style={{ textAlign: "center", color: "var(--text-secondary)", fontSize: 13 }}>
-              Показаны первые 50 групп из {groups.length}
+              {t("dup.limit", { n: groups.length })}
             </div>
           )}
         </div>

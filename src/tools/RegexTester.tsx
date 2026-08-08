@@ -1,17 +1,20 @@
 import { useMemo, useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Input } from "../components/ui";
+import { useI18n } from "../core/i18n";
 
 export default function RegexTester() {
   const [pattern, setPattern] = useState("");
   const [text, setText] = useState("");
   const [flags, setFlags] = useState("g");
   const [error, setError] = useState<string | null>(null);
+  const { t } = useI18n();
 
   const matches = useMemo(() => {
     if (!pattern || !text) return [] as string[];
     try {
-      const re = new RegExp(pattern, flags);
+      const reFlags = flags.includes("g") ? flags : `${flags}g`;
+      const re = new RegExp(pattern, reFlags);
       setError(null);
       return [...text.matchAll(re)].map((m) => m[0]);
     } catch (e) {
@@ -25,7 +28,7 @@ export default function RegexTester() {
       id="regex-tester"
       toolbar={
         <>
-          <Input className="mono-value" placeholder="Регулярное выражение" value={pattern} onChange={(e) => setPattern(e.target.value)} style={{ width: 380 }} />
+          <Input className="mono-value" placeholder={t("regex.pattern")} value={pattern} onChange={(e) => setPattern(e.target.value)} style={{ width: 380 }} />
           {["g", "i", "m", "s"].map((f) => (
             <button key={f} className={`fk-chip${flags.includes(f) ? " fk-chip--on" : ""}`} onClick={() => setFlags((prev) => (prev.includes(f) ? prev.replace(f, "") : prev + f))}>
               {f}
@@ -33,12 +36,12 @@ export default function RegexTester() {
           ))}
         </>
       }
-      statusLeft={<span>{error ? `Ошибка: ${error}` : `Совпадений: ${matches.length}`}</span>}
-      statusRight={matches.length > 0 ? <span>Всего букв в совпадениях: {matches.reduce((a, m) => a + m.length, 0)}</span> : undefined}
+      statusLeft={<span>{error ? `${t("common.error")}: ${error}` : t("regex.matches", { n: matches.length })}</span>}
+      statusRight={matches.length > 0 ? <span>{t("regex.chars")}: {matches.reduce((a, m) => a + m.length, 0)}</span> : undefined}
     >
       <textarea
         className="fk-textarea mono-value"
-        placeholder="Текст для проверки…"
+        placeholder={t("regex.textPlaceholder")}
         value={text}
         onChange={(e) => setText(e.target.value)}
         spellCheck={false}
@@ -48,7 +51,7 @@ export default function RegexTester() {
         <div className="fk-panel" style={{ marginTop: 14, maxHeight: 180, overflow: "auto" }}>
           {matches.map((m, i) => (
             <div key={i} className="fk-list__item" style={{ borderBottom: "1px solid var(--border-soft)", borderRadius: 0 }}>
-              <span className="mono-value" style={{ fontSize: 12.5 }}>{m || "(пустое совпадение)"}</span>
+              <span className="mono-value" style={{ fontSize: 12.5 }}>{m || t("regex.emptyMatch")}</span>
             </div>
           ))}
         </div>

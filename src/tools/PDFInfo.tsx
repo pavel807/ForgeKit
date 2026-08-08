@@ -4,8 +4,10 @@ import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState } from "../components/ui";
 import { api, pickFiles, type PdfInfo } from "../core/api";
 import { formatBytes } from "../core/format";
+import { useI18n } from "../core/i18n";
 
 export default function PDFInfo() {
+  const { t } = useI18n();
   const [file, setFile] = useState<string | null>(null);
   const [info, setInfo] = useState<PdfInfo | null>(null);
   const [busy, setBusy] = useState(false);
@@ -21,14 +23,14 @@ export default function PDFInfo() {
   }
 
   const rows = [
-    { label: "Файл", value: file ? file.slice(file.lastIndexOf("/") + 1) : "" },
-    { label: "Размер", value: info ? formatBytes(info.size) : "" },
-    { label: "Версия PDF", value: info?.version ?? "" },
-    { label: "Страниц", value: info ? String(info.pages) : "" },
-    { label: "Название", value: info?.title ?? "" },
-    { label: "Автор", value: info?.author ?? "" },
-    { label: "Создатель", value: info?.creator ?? "" },
-    { label: "Программа", value: info?.producer ?? "" },
+    { label: t("pdfinfo.file"), value: file ? file.slice(file.lastIndexOf("/") + 1) : "" },
+    { label: t("pdfinfo.size"), value: info ? formatBytes(info.size) : "" },
+    { label: t("pdfinfo.version"), value: info?.version ?? "" },
+    { label: t("pdfinfo.pages"), value: info ? String(info.pages) : "" },
+    { label: t("pdfinfo.title"), value: info?.title ?? "" },
+    { label: t("pdfinfo.author"), value: info?.author ?? "" },
+    { label: t("pdfinfo.creator"), value: info?.creator ?? "" },
+    { label: t("pdfinfo.producer"), value: info?.producer ?? "" },
   ];
 
   return (
@@ -36,18 +38,18 @@ export default function PDFInfo() {
       id="pdf-info"
       actions={
         <Button variant="primary" leftIcon={<FileText size={15} />} onClick={pick} disabled={busy}>
-          {busy ? "Чтение…" : "Открыть PDF"}
+          {busy ? t("pdfinfo.reading") : t("pdfinfo.openPdf")}
         </Button>
       }
-      statusLeft={<span>Метаданные читаются из трассировки PDF</span>}
-      statusRight={info ? <span>Обновлено</span> : undefined}
+      statusLeft={<span>{t("pdfinfo.hint")}</span>}
+      statusRight={info ? <span>{t("pdfinfo.updated")}</span> : undefined}
     >
       {!info ? (
         <EmptyState
           icon={<FileText size={24} />}
-          title="Информация о PDF"
-          description="Показывает количество страниц, версию и метаданные документа"
-          action={<Button variant="primary" leftIcon={<FileText size={15} />} onClick={pick}>{file ? "Другой файл" : "Выбрать PDF-файл"}</Button>}
+          title={t("pdfinfo.emptyTitle")}
+          description={t("pdfinfo.emptyDesc")}
+          action={<Button variant="primary" leftIcon={<FileText size={15} />} onClick={pick}>{file ? t("pdfinfo.otherFile") : t("pdfinfo.pickFile")}</Button>}
         />
       ) : (
         <div className="fk-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 2 }}>

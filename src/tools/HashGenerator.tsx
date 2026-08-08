@@ -3,6 +3,7 @@ import { Hash } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, CopyButton } from "../components/ui";
 import { api, isTauri, useRust } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 const ALGOS = [
   { key: "md5", label: "MD5" },
@@ -12,6 +13,7 @@ const ALGOS = [
 ];
 
 export default function HashGenerator() {
+  const { t } = useI18n();
   const [input, setInput] = useState("");
   const [hashes, setHashes] = useState<Record<string, string> | null>(null);
   const [busy, setBusy] = useState(false);
@@ -26,7 +28,7 @@ export default function HashGenerator() {
           try {
             next[a.key] = await api.hashString(input, a.key);
           } catch (e) {
-            next[a.key] = `Ошибка: ${e}`;
+            next[a.key] = `${t("common.error")}: ${e}`;
           }
         }),
       );
@@ -38,7 +40,7 @@ export default function HashGenerator() {
           const buf = await crypto.subtle.digest(a.key.toUpperCase().replace("-", ""), enc.encode(input));
           next[a.key] = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
         } else {
-          next[a.key] = "(доступно в Tauri)";
+          next[a.key] = t("hash.tauriOnly");
         }
       }
     }
@@ -54,16 +56,16 @@ export default function HashGenerator() {
       id="hash-generator"
       actions={
         <Button variant="primary" leftIcon={<Hash size={15} />} onClick={compute} disabled={busy || !input}>
-          {busy ? "Хэшируем…" : "Вычислить хэши"}
+          {busy ? t("hash.computing") : t("hash.compute")}
         </Button>
       }
-      statusLeft={<span>{input ? `Входных данных: ${inputBytes} байт` : "Введите текст для хэширования"}</span>}
-      statusRight={<span>Алгоритмы: MD5, SHA-1, SHA-256, SHA-512</span>}
+      statusLeft={<span>{input ? t("hash.inputBytes", { n: inputBytes }) : t("hash.inputHint")}</span>}
+      statusRight={<span>{t("hash.algos")}</span>}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <textarea
           className="fk-textarea mono-value"
-          placeholder="Введите текст…"
+          placeholder={t("hash.placeholder")}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           spellCheck={false}

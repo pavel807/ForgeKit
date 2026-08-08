@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { CopyButton, Input, SegmentedControl } from "../components/ui";
-import { api, useRust } from "../core/api";
+import { api, isTauri, useRust } from "../core/api";
 import type { DateParts, DateResult } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 function formatForParts(parts: DateParts, format: string): string {
   const map: Record<string, string> = {
@@ -25,10 +26,13 @@ function localStr(r: DateResult | null): string {
 export default function DateTimeConverter() {
   const [tab, setTab] = useState<"webtime" | "table">("webtime");
   const [now, setNow] = useState<DateResult | null>(null);
+  const { t } = useI18n();
 
   useEffect(() => {
+    if (!isTauri()) return;
     let alive = true;
-    const tick = () => api.dateNow().then((r) => alive && setNow(r));
+    const tick = () =>
+      api.dateNow().then((r) => { if (alive) setNow(r); }).catch(() => {});
     tick();
     const t = setInterval(tick, 1000);
     return () => {
@@ -41,26 +45,26 @@ export default function DateTimeConverter() {
   const { data: customRes } = useRust(() => api.dateConvert(custom), [custom]);
 
   const parsed = customRes && customRes.ok ? customRes.result : null;
-  const parsedError = customRes && !customRes.ok ? (customRes.error ?? "Формат не распознан") : null;
+  const parsedError = customRes && !customRes.ok ? (customRes.error ?? t("dt.parseError")) : null;
 
   const presets = ["YYYY-MM-DD HH:mm:ss", "DD-MM-YYYY", "HH:mm:ss", "DD.MM.YYYY"];
 
   return (
     <ToolPage
       id="date-time-converter"
-      toolbar={<SegmentedControl value={tab} onChange={(v) => setTab(v as "webtime" | "table")} items={[{ value: "webtime", label: "Текущее время" }, { value: "table", label: "Перевод даты" }]} />}
-      statusLeft={<span>Все времена в local timezone</span>}
+      toolbar={<SegmentedControl value={tab} onChange={(v) => setTab(v as "webtime" | "table")} items={[{ value: "webtime", label: t("dt.now") }, { value: "table", label: t("dt.convert") }]} />}
+      statusLeft={<span>{t("dt.localTz")}</span>}
       statusRight={<span>{localStr(now)}</span>}
     >
       {tab === "webtime" ? (
         <div className="fk-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
           <div className="info-row">
-            <span className="info-row__label">Unix (секунды)</span>
+            <span className="info-row__label">{t("dt.unixSec")}</span>
             <span className="info-row__value mono-value">{now ? now.unix : ""}</span>
             <CopyButton text={now ? String(now.unix) : ""} size="sm" />
           </div>
           <div className="info-row">
-            <span className="info-row__label">Unix (миллисекунды)</span>
+            <span className="info-row__label">{t("dt.unixMs")}</span>
             <span className="info-row__value mono-value">{now ? now.ms : ""}</span>
             <CopyButton text={now ? String(now.ms) : ""} size="sm" />
           </div>
@@ -70,7 +74,7 @@ export default function DateTimeConverter() {
             <CopyButton text={now ? now.iso : ""} size="sm" />
           </div>
           <div className="info-row">
-            <span className="info-row__label">Локальная дата</span>
+            <span className="info-row__label">{t("dt.localDate")}</span>
             <span className="info-row__value">{localStr(now)}</span>
           </div>
           <div className="info-row">
@@ -82,13 +86,13 @@ export default function DateTimeConverter() {
       ) : (
         <div className="fk-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div className="converter-row">
-            <span className="info-row__label" style={{ width: 120 }}>Дата/время</span>
-            <Input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="2026-08-05T12:34:56 или секунды…" style={{ width: 300 }} />
+            <span className="info-row__label" style={{ width: 120 }}>{t("dt.datetime")}</span>
+            <Input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder={t("dt.inputPlaceholder")} style={{ width: 300 }} />
           </div>
           {parsed && (
             <>
               <div className="info-row">
-                <span className="info-row__label">Unix (с)</span>
+                <span className="info-row__label">{t("dt.unixSec")}</span>
                 <span className="info-row__value mono-value">{parsed.unix}</span>
                 <CopyButton text={String(parsed.unix)} size="sm" />
               </div>

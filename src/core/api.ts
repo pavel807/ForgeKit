@@ -246,6 +246,7 @@ export const api = {
   clipboardStoreText: (kind: string, text: string) => invoke<void>("clipboard_store_text", { kind, text }),
   clipboardStoreImage: (pngBase64: string) => invoke<void>("clipboard_store_image", { pngBase64 }),
   clipboardRestore: (id: number) => invoke<void>("clipboard_restore", { id }),
+  clipboardMonitorSetEnabled: (enabled: boolean) => invoke<void>("set_monitor_enabled", { enabled }),
 
   /* --- Файлы --- */
   filesScan: (dir: string, recursive: boolean) => invoke<FileEntry[]>("files_scan", { dir, recursive }),
@@ -338,26 +339,27 @@ export function isMac(): boolean {
 
 /* --- Открытие диалогов выбора файлов --- */
 import { open, save } from "@tauri-apps/plugin-dialog";
+import { t } from "./i18n";
 
 export async function pickFiles(options: { multiple?: boolean; filters?: { name: string; extensions: string[] }[] } = {}): Promise<string[] | null> {
   const result = await open({
     multiple: options.multiple ?? false,
     directory: false,
     filters: options.filters,
-    title: "Выберите файлы",
+    title: t("app.pickFiles"),
   });
   if (!result) return null;
   return Array.isArray(result) ? result : [result];
 }
 
 export async function pickDirectory(): Promise<string | null> {
-  const result = await open({ directory: true, title: "Выберите папку" });
+  const result = await open({ directory: true, title: t("app.pickFolder") });
   if (!result) return null;
   return Array.isArray(result) ? result[0] : result;
 }
 
 export async function pickSave(defaultName: string, filters?: { name: string; extensions: string[] }[]): Promise<string | null> {
-  return save({ defaultPath: defaultName, filters, title: "Сохранить файл" });
+  return save({ defaultPath: defaultName, filters, title: t("app.saveFile") });
 }
 
 /* --- Хук для вызова команд ядра и получения результата --- */

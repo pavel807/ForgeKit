@@ -264,6 +264,8 @@ export function SegmentedControl<T extends string>({ value, onChange, items }: S
 }
 
 /* ---------- Кнопка «Скопировать» ---------- */
+import { t } from "../core/i18n";
+
 export function CopyButton({ text, size = "md", label, disabled }: { text: string; size?: "md" | "sm"; label?: string; disabled?: boolean }) {
   const [copied, setCopied] = useState(false);
 
@@ -282,12 +284,12 @@ export function CopyButton({ text, size = "md", label, disabled }: { text: strin
   if (label) {
     return (
       <Button size={size} leftIcon={copied ? <Check size={14} className="text-[var(--success)]" /> : <Copy size={14} />} onClick={copy} disabled={disabled}>
-        {copied ? "Скопировано" : label}
+        {copied ? t("common.copied") : label}
       </Button>
     );
   }
   return (
-    <IconButton size={size} onClick={copy} disabled={disabled} tooltip={copied ? "Скопировано" : "Скопировать"}>
+    <IconButton size={size} onClick={copy} disabled={disabled} tooltip={copied ? t("common.copied") : t("common.copy")}>
       {copied ? <Check size={15} className="text-[var(--success)]" /> : <Copy size={15} />}
     </IconButton>
   );

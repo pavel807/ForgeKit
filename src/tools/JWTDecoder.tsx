@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { CopyButton } from "../components/ui";
 import { api, useRust } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function JWTDecoder() {
+  const { t } = useI18n();
   const [token, setToken] = useState("");
 
   const { data: decoded, error } = useRust(() => api.jwtDecode(token), [token]);
@@ -11,8 +13,8 @@ export default function JWTDecoder() {
   return (
     <ToolPage
       id="jwt-decoder"
-      statusLeft={<span>{error ? "Ошибка декодирования" : "JWT декодируется локально в ядре, без отправки данных"}</span>}
-      statusRight={decoded ? <span>Срок действия: {decoded.exp_str ?? "не указан (exp)"}</span> : undefined}
+      statusLeft={<span>{error ? t("jwt.decodeError") : t("jwt.hint")}</span>}
+      statusRight={decoded ? <span>{t("jwt.expiresAt", { at: decoded.exp_str ?? t("jwt.expNotSet") })}</span> : undefined}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
         <textarea
@@ -38,7 +40,7 @@ export default function JWTDecoder() {
               <pre className="fk-code mono-value">{decoded.payload}</pre>
             </div>
             <div className="fk-panel fk-panel--row" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>Подпись (не проверяется):</span>
+              <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>{t("jwt.signature")}</span>
               <span className="mono-value" style={{ flex: 1, fontSize: 12, overflowWrap: "anywhere", userSelect: "text" }}>
                 {decoded.signature}
               </span>

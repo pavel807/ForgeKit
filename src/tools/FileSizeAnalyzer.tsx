@@ -4,8 +4,10 @@ import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, Progress } from "../components/ui";
 import { api, pickDirectory, type SizeEntry } from "../core/api";
 import { formatBytes } from "../core/format";
+import { useI18n } from "../core/i18n";
 
 export default function FileSizeAnalyzer() {
+  const { t } = useI18n();
   const [dir, setDir] = useState<string | null>(null);
   const [entries, setEntries] = useState<SizeEntry[]>([]);
   const [busy, setBusy] = useState(false);
@@ -27,20 +29,20 @@ export default function FileSizeAnalyzer() {
       id="file-size-analyzer"
       actions={
         <Button variant="primary" leftIcon={<PieChart size={15} />} onClick={scan} disabled={busy}>
-          {busy ? "Анализ…" : "Проанализировать папку"}
+          {busy ? t("fsize.analyzing") : t("fsize.analyze")}
         </Button>
       }
-      statusLeft={dir ? <span className="mono-value" style={{ fontSize: 11.5 }}>{dir}</span> : <span>Папка не выбрана</span>}
-      statusRight={total > 0 ? <span>Всего: {formatBytes(total)}</span> : undefined}
+      statusLeft={dir ? <span className="mono-value" style={{ fontSize: 11.5 }}>{dir}</span> : <span>{t("fsize.noFolder")}</span>}
+      statusRight={total > 0 ? <span>{t("fsize.total", { n: formatBytes(total) })}</span> : undefined}
     >
       {entries.length === 0 ? (
         <EmptyState
           icon={<PieChart size={24} />}
-          title="Анализ размера файлов"
-          description="Покажите, какие папки и файлы занимают больше всего места на диске"
+          title={t("fsize.emptyTitle")}
+          description={t("fsize.emptyDesc")}
           action={
             <Button variant="primary" leftIcon={<FolderOpen size={15} />} onClick={scan}>
-              Выбрать папку
+              {t("fsize.pickFolder")}
             </Button>
           }
         />
@@ -58,7 +60,7 @@ export default function FileSizeAnalyzer() {
             ))}
           </div>
           <div style={{ marginTop: 16, fontSize: 12.5, color: "var(--text-secondary)" }}>
-            Всего элементов: {entries.length} · показаны первые 40
+            {t("fsize.limit", { n: entries.length })}
           </div>
         </div>
       )}

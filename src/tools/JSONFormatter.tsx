@@ -2,16 +2,18 @@ import { useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, CopyButton } from "../components/ui";
 import { api, useRust } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function JSONFormatter() {
+  const { t } = useI18n();
   const [input, setInput] = useState("");
   const [indent, setIndent] = useState(2);
 
   const { data } = useRust(() => api.jsonFormat(input, indent), [input, indent]);
 
   const output = data?.output ?? "";
-  const error = data && !data.ok ? (data.error ?? "Ошибка в JSON") : null;
-  const stats = data?.ok && data.output ? `Строк: ${data.lines} · ${data.bytes} байт` : "";
+  const error = data && !data.ok ? (data.error ?? t("jsonf.error")) : null;
+  const stats = data?.ok && data.output ? t("jsonf.stats", { l: data.lines, b: data.bytes }) : "";
 
   return (
     <ToolPage
@@ -19,24 +21,24 @@ export default function JSONFormatter() {
       toolbar={
         <>
           <select className="fk-select" value={String(indent)} onChange={(e) => setIndent(Number(e.target.value))}>
-            <option value="2">Отступ: 2 пробела</option>
-            <option value="4">Отступ: 4 пробела</option>
-            <option value="0">Без отступов</option>
+            <option value="2">{t("jsonf.indent2")}</option>
+            <option value="4">{t("jsonf.indent4")}</option>
+            <option value="0">{t("jsonf.noIndent")}</option>
           </select>
           <div className="spacer" />
           <Button variant="primary" onClick={() => setInput(output)} disabled={!output}>
-            Применить формат
+            {t("jsonf.apply")}
           </Button>
           <CopyButton text={output} disabled={!output} />
         </>
       }
-      statusLeft={<span>{error ? "Ошибка в JSON" : data?.output ? "Данные валидны" : ""}</span>}
+      statusLeft={<span>{error ? t("jsonf.error") : data?.output ? t("jsonf.valid") : ""}</span>}
       statusRight={<span>{stats}</span>}
     >
       <div className="split-editor">
         <textarea
           className="fk-textarea mono-value"
-          placeholder="Вставьте JSON…"
+          placeholder={t("jsonf.inputPlaceholder")}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           spellCheck={false}
@@ -47,7 +49,7 @@ export default function JSONFormatter() {
           className="fk-textarea mono-value"
           value={output}
           readOnly
-          placeholder={error ? "" : "Отформатированный JSON"}
+          placeholder={error ? "" : t("jsonf.outputPlaceholder")}
           spellCheck={false}
         />
       </div>

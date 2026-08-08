@@ -2,12 +2,14 @@ import { useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { CopyButton, Input } from "../components/ui";
 import { api, useRust } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 const PRESETS = ["#2563EB", "#0F172A", "#FFFFFF", "#DC2626", "#16A34A", "#D97706", "#9333EA", "#0EA5E9"];
 
 export default function ColorPicker() {
   const [hex, setHex] = useState("#2563EB");
   const [showNative, setShowNative] = useState(false);
+  const { t } = useI18n();
 
   const { data: color } = useRust(() => api.colorConvert(hex), [hex]);
 
@@ -19,8 +21,8 @@ export default function ColorPicker() {
   return (
     <ToolPage
       id="color-picker"
-      statusLeft={<span>Конвертация HEX ↔ RGB ↔ HSL ↔ CMYK</span>}
-      statusRight={color ? <span>HSL: hsl({color.hsl}, 100%)</span> : undefined}
+      statusLeft={<span>{t("color.hint")}</span>}
+      statusRight={color ? <span>HSL: hsl({color.hsl})</span> : undefined}
     >
       <div className="fk-panel" style={{ padding: "20px 22px", display: "flex", gap: 24 }}>
         <div className="color-swatch" style={{ width: 120, height: 120, borderRadius: "var(--radius-lg)", border: "1px solid var(--border)", background: color ? `rgb(${color.rgb.join(", ")})` : "#fff" }} />
@@ -29,7 +31,7 @@ export default function ColorPicker() {
             <span className="info-row__label" style={{ width: 90 }}>HEX</span>
             <Input className="mono-value" value={hex} onChange={(e) => { setHex(e.target.value); }} style={{ width: 140 }} />
             <button className="fk-btn fk-btn--ghost" onClick={() => setShowNative((v) => !v)}>
-              {showNative ? "Скрыть палитру" : "Палитра"}
+              {showNative ? t("color.hidePalette") : t("color.palette")}
             </button>
             {showNative && (
               <input
@@ -51,9 +53,9 @@ export default function ColorPicker() {
           <div className="converter-row">
             <span className="info-row__label" style={{ width: 90 }}>HSL</span>
             <span className="info-row__value mono-value" style={{ fontSize: 13.5, userSelect: "text" }}>
-              {color ? `hsl(${color.hsl}, 100%)` : "—"}
+              {color ? `hsl(${color.hsl})` : "—"}
             </span>
-            {color && <CopyButton text={`hsl(${color.hsl}, 100%)`} size="sm" />}
+            {color && <CopyButton text={`hsl(${color.hsl})`} size="sm" />}
           </div>
           <div className="converter-row">
             <span className="info-row__label" style={{ width: 90 }}>CMYK</span>

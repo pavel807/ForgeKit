@@ -3,8 +3,10 @@ import { FolderOpen, FolderTree, Move } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, Select } from "../components/ui";
 import { api, pickDirectory, type OrganizeResult } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function FileOrganizer() {
+  const { t } = useI18n();
   const [dir, setDir] = useState<string | null>(null);
   const [mode, setMode] = useState<string>("type");
   const [preview, setPreview] = useState<OrganizeResult[] | null>(null);
@@ -42,10 +44,10 @@ export default function FileOrganizer() {
       actions={
         <>
           <Button leftIcon={<FolderOpen size={15} />} onClick={open}>
-            Выбрать папку
+            {t("organizer.pickFolder")}
           </Button>
           <Button variant="primary" leftIcon={<Move size={15} />} onClick={() => run(false)} disabled={busy || !preview || preview.length === 0}>
-            Переместить файлы
+            {t("organizer.move")}
           </Button>
         </>
       }
@@ -53,19 +55,19 @@ export default function FileOrganizer() {
         <Select
           label=""
           options={[
-            { value: "type", label: "По типу файла" },
-            { value: "ext", label: "По расширению" },
+            { value: "type", label: t("organizer.byType") },
+            { value: "ext", label: t("organizer.byExt") },
           ]}
           value={mode}
           onChange={(e) => setMode(e.target.value)}
         />
       }
-      statusLeft={dir ? <span className="mono-value" style={{ fontSize: 11.5 }}>{dir}</span> : <span>Папка не выбрана</span>}
+      statusLeft={dir ? <span className="mono-value" style={{ fontSize: 11.5 }}>{dir}</span> : <span>{t("organizer.noFolder")}</span>}
       statusRight={
         preview || applied ? (
           <span>
-            Перемещений: {okCount}
-            {errCount > 0 ? ` · ошибок: ${errCount}` : ""}
+            {t("organizer.moves", { n: okCount })}
+            {errCount > 0 ? ` · ${t("organizer.errors", { n: errCount })}` : ""}
           </span>
         ) : undefined
       }
@@ -73,11 +75,11 @@ export default function FileOrganizer() {
       {!dir ? (
         <EmptyState
           icon={<FolderTree size={24} />}
-          title="Организация файлов"
-          description="ForgeKit разложит файлы по папкам по типу или расширению. Сначала покажет предпросмотр перемещений"
+          title={t("organizer.emptyTitle")}
+          description={t("organizer.emptyDesc")}
           action={
             <Button variant="primary" leftIcon={<FolderOpen size={15} />} onClick={open}>
-              Выбрать папку
+              {t("organizer.pickFolder")}
             </Button>
           }
         />
@@ -86,12 +88,12 @@ export default function FileOrganizer() {
           {!preview && !applied && (
             <div className="row">
               <Button variant="primary" leftIcon={<FolderTree size={15} />} onClick={() => run(true)} disabled={busy}>
-                Показать предпросмотр
+                {t("organizer.preview")}
               </Button>
             </div>
           )}
           {(preview ?? applied)?.length === 0 && (
-            <EmptyState icon={<FolderTree size={24} />} title="Перемещать нечего" description="Все файлы уже упорядочены" />
+            <EmptyState icon={<FolderTree size={24} />} title={t("organizer.none")} description={t("organizer.noneDesc")} />
           )}
           {(preview ?? applied ?? []).map((r, i) => (
             <div key={i} className="fk-list__item" style={{ border: "1px solid var(--border-soft)", borderRadius: "var(--radius)" }}>

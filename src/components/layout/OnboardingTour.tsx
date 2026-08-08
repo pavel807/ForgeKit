@@ -115,9 +115,7 @@ export function OnboardingTour({ open, onFinish }: OnboardingTourProps) {
 
   return (
     <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label={step.title}>
-      <div className="absolute inset-0 bg-black/45" />
-
-      {rect && (
+      {rect ? (
         <div
           className="pointer-events-none fixed z-[110] rounded-xl transition-all duration-200"
           style={{
@@ -125,9 +123,12 @@ export function OnboardingTour({ open, onFinish }: OnboardingTourProps) {
             top: rect.top - 4,
             width: rect.width + 8,
             height: rect.height + 8,
-            boxShadow: "0 0 0 2px var(--fk-accent), 0 0 24px 4px rgba(0,162,255,0.35)",
+            boxShadow:
+              "0 0 0 9999px rgba(0,0,0,0.45), 0 0 0 2px var(--fk-accent), 0 0 24px 4px rgba(0,162,255,0.35)",
           }}
         />
+      ) : (
+        <div className="absolute inset-0 bg-black/45" />
       )}
 
       {card && (
@@ -144,7 +145,7 @@ export function OnboardingTour({ open, onFinish }: OnboardingTourProps) {
             <button
               type="button"
               onClick={onFinish}
-              title="Пропустить"
+              title={t("tour.skip")}
               className="absolute right-3 top-3 grid size-7 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <X size={15} />

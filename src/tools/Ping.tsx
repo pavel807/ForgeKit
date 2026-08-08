@@ -3,12 +3,14 @@ import { Wifi } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, Input } from "../components/ui";
 import { api, type PingResult } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function Ping() {
   const [host, setHost] = useState("google.com");
   const [result, setResult] = useState<PingResult | null>(null);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
+  const { t } = useI18n();
 
   async function ping() {
     if (busyRef.current) return;
@@ -31,42 +33,42 @@ export default function Ping() {
       id="ping"
       actions={
         <Button variant="primary" leftIcon={<Wifi size={15} />} onClick={ping} disabled={busy}>
-          {busy ? "Проверка…" : "Пинг"}
+          {busy ? t("ping.checking") : t("ping.ping")}
         </Button>
       }
       toolbar={<Input className="mono-value" placeholder="example.com" value={host} onChange={(e) => setHost(e.target.value)} style={{ width: 280 }} />}
-      statusLeft={<span>TCP-подключение к порту 443 · пинг каждые 2 с</span>}
+      statusLeft={<span>{t("ping.hint")}</span>}
       statusRight={
         result ? (
-          result.ok ? <span style={{ color: "var(--success)" }}>Доступен</span> : <span style={{ color: "var(--danger)" }}>Недоступен</span>
+          result.ok ? <span style={{ color: "var(--success)" }}>{t("ping.up")}</span> : <span style={{ color: "var(--danger)" }}>{t("ping.down")}</span>
         ) : undefined
       }
     >
       {!result ? (
         <EmptyState
           icon={<Wifi size={24} />}
-          title="Проверка доступности"
-          description="Проверяет доступность хоста и измеряет задержку соединения"
+          title={t("ping.emptyTitle")}
+          description={t("ping.emptyDesc")}
           action={
             <Button variant="primary" leftIcon={<Wifi size={15} />} onClick={ping}>
-              Проверить
+              {t("ping.check")}
             </Button>
           }
         />
       ) : (
         <div className="fk-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
           <div className="info-row">
-            <span className="info-row__label">Хост</span>
+            <span className="info-row__label">{t("ping.host")}</span>
             <span className="info-row__value mono-value">{host}</span>
           </div>
           <div className="info-row">
-            <span className="info-row__label">Задержка</span>
-            <span className="info-row__value mono-value">{result.ok && result.latency_ms != null ? `${result.latency_ms} мс` : "—"}</span>
+            <span className="info-row__label">{t("ping.latency")}</span>
+            <span className="info-row__value mono-value">{result.ok && result.latency_ms != null ? t("ping.ms", { n: result.latency_ms }) : "—"}</span>
           </div>
           <div className="info-row">
-            <span className="info-row__label">Статус</span>
+            <span className="info-row__label">{t("ping.status")}</span>
             <span className="info-row__value" style={{ color: result.ok ? "var(--success)" : "var(--danger)" }}>
-              {result.ok ? "Доступен" : (result.error ?? "Недоступен")}
+              {result.ok ? t("ping.up") : (result.error ?? t("ping.down"))}
             </span>
           </div>
         </div>

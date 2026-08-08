@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Progress } from "../components/ui";
 import { api, useRust } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function PasswordStrength() {
+  const { t } = useI18n();
   const [password, setPassword] = useState("");
 
   const { data } = useRust(() => api.passwordStrength(password), [password]);
@@ -11,21 +13,21 @@ export default function PasswordStrength() {
   const percent = data?.percent ?? 0;
   const label =
     data == null
-      ? "Введите пароль"
+      ? t("pwdstr.enter")
       : percent < 34
-        ? "Слабый пароль"
+        ? t("pwdstr.weak")
         : percent < 67
-          ? "Средний пароль"
-          : "Надёжный пароль";
+          ? t("pwdstr.fair")
+          : t("pwdstr.strong");
 
   return (
     <ToolPage
       id="password-strength"
-      statusLeft={<span>Оценка основана на длине и наборе символов</span>}
+      statusLeft={<span>{t("pwdstr.hint")}</span>}
       statusRight={password ? <span style={{ fontWeight: 600 }}>{label}</span> : undefined}
     >
       <div className="fk-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 16 }}>
-        <input className="fk-input mono-value" type="password" placeholder="Введите пароль…" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
+        <input className="fk-input mono-value" type="password" placeholder={t("pwdstr.placeholder")} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="off" />
         <Progress value={percent} tone={percent >= 67 ? "success" : percent >= 34 ? "warning" : "danger"} />
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {(data?.checks ?? []).map((c, i) => (

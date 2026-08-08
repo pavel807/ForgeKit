@@ -32,10 +32,17 @@ export default function Settings() {
 
   useEffect(() => {
     if (!isTauri()) return;
-    api.settingsGet("clipboard_limit").then((v) => {
-      if (v) setClipboardLimit(v);
+    Promise.all([api.settingsGet("clipboard_limit"), api.settingsGet("clipboard_monitor")]).then(([limit, monitor]) => {
+      if (limit) setClipboardLimit(limit);
+      if (monitor !== null) setClipboardMonitor(monitor !== "false");
     });
   }, []);
+
+  async function toggleMonitor(on: boolean) {
+    setClipboardMonitor(on);
+    if (!isTauri()) return;
+    await api.clipboardMonitorSetEnabled(on).catch(() => {});
+  }
 
   async function save() {
     if (!isTauri()) return;
@@ -89,7 +96,7 @@ export default function Settings() {
           description={t("set.monitorDesc")}
           control={
             <label className="fk-switch">
-              <input type="checkbox" checked={clipboardMonitor} onChange={(e) => setClipboardMonitor(e.target.checked)} />
+              <input type="checkbox" checked={clipboardMonitor} onChange={(e) => toggleMonitor(e.target.checked)} />
               <span className="fk-switch__track" />
             </label>
           }

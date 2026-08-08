@@ -25,6 +25,7 @@ export default function ClipboardHistory() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [imageSrcs, setImageSrcs] = useState<Record<number, string>>({});
   const timerRef = useRef<number | null>(null);
+  const seqRef = useRef(0);
   const { t, lang } = useI18n();
 
   const FILTERS: { value: Filter; label: string }[] = [
@@ -44,10 +45,13 @@ export default function ClipboardHistory() {
   };
 
   const refresh = useCallback(async () => {
+    const seq = ++seqRef.current;
     try {
       const list = await api.clipboardList(filter, query);
+      if (seq !== seqRef.current) return;
       setItems(list);
     } catch {
+      if (seq !== seqRef.current) return;
       setItems([]);
     }
     setLoaded(true);
@@ -67,13 +71,12 @@ export default function ClipboardHistory() {
   useEffect(() => {
     if (!isTauri()) return;
     let cancelled = false;
-    Promise.all(
-      items.filter((it) => it.kind === "image").map((it) => api.clipboardGet(it.id).catch(() => null)),
-    ).then((fulls) => {
+    const imgs = items.filter((it) => it.kind === "image");
+    Promise.all(imgs.map((it) => api.clipboardGet(it.id).catch(() => null))).then((fulls) => {
       if (cancelled) return;
       const next: Record<number, string> = {};
-      items.forEach((it, idx) => {
-        const full = fulls[idx];
+      imgs.forEach((it, i) => {
+        const full = fulls[i];
         if (full?.data_path) next[it.id] = convertFileSrc(full.data_path);
       });
       setImageSrcs((prev) => ({ ...prev, ...next }));

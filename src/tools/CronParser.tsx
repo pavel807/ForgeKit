@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Input } from "../components/ui";
 import { api, useRust } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function CronParser() {
+  const { t } = useI18n();
   const [expr, setExpr] = useState("*/5 * * * *");
 
   const { data } = useRust(() => api.cronParse(expr), [expr]);
@@ -15,8 +17,8 @@ export default function CronParser() {
       toolbar={
         <Input className="mono-value" placeholder="*/5 * * * *" value={expr} onChange={(e) => setExpr(e.target.value)} style={{ width: 240 }} />
       }
-      statusLeft={<span>{data ? (data.ok ? "Выражение корректно" : "Ошибка: ожидается 5 полей") : ""}</span>}
-      statusRight={spec ? <span>Ближайший запуск: {spec.next_runs[0] ?? "—"}</span> : undefined}
+      statusLeft={<span>{data ? (data.ok ? t("cron.valid") : t("cron.expect5")) : ""}</span>}
+      statusRight={spec ? <span>{t("cron.nextRun", { at: spec.next_runs[0] ?? "—" })}</span> : undefined}
     >
       {spec ? (
         <div className="fk-panel" style={{ padding: "16px 18px" }}>
@@ -27,7 +29,7 @@ export default function CronParser() {
           </div>
           <div style={{ borderTop: "1px solid var(--border-soft)", marginTop: 14, paddingTop: 14 }}>
             <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 8 }}>
-              Ближайшие запуски
+              {t("cron.nextRuns")}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {spec.next_runs.map((d, i) => (
@@ -39,7 +41,7 @@ export default function CronParser() {
           </div>
         </div>
       ) : (
-        <div style={{ color: "var(--danger)", fontSize: 13 }}>{data && !data.ok ? "Выражение не распознано" : ""}</div>
+        <div style={{ color: "var(--danger)", fontSize: 13 }}>{data && !data.ok ? t("cron.invalid") : ""}</div>
       )}
     </ToolPage>
   );

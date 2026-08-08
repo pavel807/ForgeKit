@@ -6,9 +6,7 @@ import { ToolPage } from "../components/layout/ToolPage";
 import { isTauri } from "../core/api";
 import { checkForUpdates, getAppVersion, type UpdateCheck } from "../core/updater";
 import { useI18n } from "../core/i18n";
-
-const TOOL_COUNT = 40;
-const CATEGORY_COUNT = 10;
+import { TOOLS, CATEGORIES } from "../core/registry";
 
 export default function About() {
   const [version, setVersion] = useState("");
@@ -46,7 +44,7 @@ export default function About() {
         </div>
         <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 4 }}>
           <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em" }}>ForgeKit</div>
-          <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>{t("about.stats", { t: TOOL_COUNT, c: CATEGORY_COUNT })}</div>
+          <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>{t("about.stats", { t: TOOLS.length, c: CATEGORIES.length })}</div>
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           {[0, 1, 2, 3, 4].map((i) => (

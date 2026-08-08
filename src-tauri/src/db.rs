@@ -68,6 +68,12 @@ pub fn set_setting(conn: &Connection, key: &str, value: &str) -> Result<(), rusq
 }
 
 fn prune(conn: &Connection) {
+    let limit: i64 = conn
+        .query_row("SELECT value FROM settings WHERE key = 'clipboard_limit'", [], |r| r.get::<_, String>(0))
+        .ok()
+        .and_then(|v| v.trim().parse().ok())
+        .filter(|n| *n > 0)
+        .unwrap_or(LIMIT);
     let _ = conn.execute(
         "DELETE FROM clipboard_history
          WHERE id NOT IN (
@@ -75,7 +81,7 @@ fn prune(conn: &Connection) {
              ORDER BY pinned DESC, created_at DESC
              LIMIT ?1
          )",
-        params![LIMIT],
+        params![limit],
     );
 }
 

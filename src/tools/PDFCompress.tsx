@@ -4,8 +4,10 @@ import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState } from "../components/ui";
 import { api, pickFiles, pickSave } from "../core/api";
 import { formatBytes } from "../core/format";
+import { useI18n } from "../core/i18n";
 
 export default function PDFCompress() {
+  const { t } = useI18n();
   const [file, setFile] = useState<string | null>(null);
   const [result, setResult] = useState<{ before: number; after: number } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -35,38 +37,38 @@ export default function PDFCompress() {
       id="pdf-compress"
       actions={
         <Button variant="primary" leftIcon={<FileCog size={15} />} onClick={compress} disabled={busy || !file}>
-          {busy ? "Оптимизация…" : "Оптимизировать"}
+          {busy ? t("pdfc.optimizing") : t("pdfc.optimize")}
         </Button>
       }
-      statusLeft={<span>Удаляет неиспользуемые объекты из PDF</span>}
+      statusLeft={<span>{t("pdfc.hint")}</span>}
       statusRight={file ? <span className="mono-value" style={{ fontSize: 11.5 }}>{file.slice(file.lastIndexOf("/") + 1)}</span> : undefined}
     >
       {!file ? (
         <EmptyState
           icon={<FileCog size={24} />}
-          title="Оптимизация PDF"
-          description="Уменьшите размер PDF, удалив избыточные и неиспользуемые данные"
-          action={<Button variant="primary" leftIcon={<FileCog size={15} />} onClick={pick}>Выбрать PDF-файл</Button>}
+          title={t("pdfc.emptyTitle")}
+          description={t("pdfc.emptyDesc")}
+          action={<Button variant="primary" leftIcon={<FileCog size={15} />} onClick={pick}>{t("pdfc.pickFile")}</Button>}
         />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div className="fk-panel fk-panel--row" style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span className="mono-value" style={{ flex: 1, fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file}</span>
-            <Button onClick={pick}>Другой файл</Button>
+            <Button onClick={pick}>{t("pdfc.otherFile")}</Button>
           </div>
-          {!result && <div className="info-row"><span className="info-row__label">Шаги</span><span className="info-row__value" style={{ fontSize: 13 }}>1. Выберите файл → 2. Укажите имя результата → 3. Проверьте итог</span></div>}
+          {!result && <div className="info-row"><span className="info-row__label">{t("pdfc.steps")}</span><span className="info-row__value" style={{ fontSize: 13 }}>{t("pdfc.stepsDesc")}</span></div>}
           {result && (
             <div className="fk-panel" style={{ padding: "18px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
               <div className="info-row">
-                <span className="info-row__label">Было</span>
+                <span className="info-row__label">{t("pdfc.before")}</span>
                 <span className="info-row__value mono-value">{formatBytes(result.before)}</span>
               </div>
               <div className="info-row">
-                <span className="info-row__label">Стало</span>
+                <span className="info-row__label">{t("pdfc.after")}</span>
                 <span className="info-row__value mono-value">{formatBytes(result.after)}</span>
               </div>
               <div className="info-row">
-                <span className="info-row__label">Экономия</span>
+                <span className="info-row__label">{t("pdfc.savedSpace")}</span>
                 <span className="info-row__value" style={{ color: "var(--success)", fontWeight: 600 }}>{saved}</span>
               </div>
             </div>

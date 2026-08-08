@@ -1,7 +1,65 @@
-# Tauri + React + Typescript
+# ForgeKit
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+Кроссплатформенный набор рабочих инструментов: 60+ утилит в одном приложении на **Tauri 2 + React 19 + Rust**.
 
-## Recommended IDE Setup
+Текущая версия: **v1.4.9**
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## Возможности
+
+- **Главная** — обзор категорий, глобальный поиск, обновления приложения
+- **Буфер обмена** — история копирования (текст и изображения), поиск, закрепление, избранное, фоновый мониторинг (можно отключить в настройках)
+- **Файлы** — массовое переименование по шаблону, организация по типам, поиск дубликатов по хэшу, анализ размера
+- **Сеть** — Ping, сканер портов, мой IP, справочник HTTP-кодов, WHOIS
+- **Система** — сведения о системе, список процессов, конвертер дат, конвертер единиц
+- **Безопасность** — генератор и проверка паролей, AES-256-GCM шифрование, генератор и проверка хэшей
+- **Разработка** — JSON Formatter / JSON Diff, Regex Tester / Regex Replace, Base64, URL Codec, JWT Decoder, UUID, Cron Parser, генератор QR
+- **Графика** — цветовой пиксель-пикер (HEX/RGB/HSL/CMYK), конвертация и сжатие изображений, изменение размера, генератор QR, оптимизация SVG
+- **Текст** — счётчик символов, преобразование регистра, сортировка, LCS-сравнение, обфускация, транслит/слаги, Lorem Ipsum, Unicode-инфо
+- **PDF** — объединение, разделение, сведения, сжатие, PDF → изображения, изображения → PDF
+
+Весь интерфейс полностью переведён на **русский и английский** (переключатель в настройках, по умолчанию — русский).
+
+## Технологии
+
+| Слой | Стек |
+| --- | --- |
+| Frontend | React 19, TypeScript, Vite 7, Tailwind CSS 4, Radix UI, Framer Motion, Lucide |
+| Desktop | Tauri 2 (Rust), плагин clipboard-manager |
+| Core | Вычисления (конвертация дат, регистры, LCS, цвет, PDF, изображения) — Rust-команды |
+
+## Рабочий процесс (local)
+
+Требуется: [Rust](https://rustup.rs/), [Bun](https://bun.sh/), Node.js.
+
+```bash
+bun install          # установка зависимостей
+bun run tauri dev    # dev-режим (окно + hot reload)
+bun run typecheck    # проверка типов (tsc --noEmit)
+bun run build        # сборка фронтенда (tsc && vite build)
+cargo test           # тесты Rust-ядра (в каталоге src-tauri)
+bun run tauri build  # сборка инсталляторов
+```
+
+## CI / релизы
+
+GitHub Actions (workflow `Build & Release`) собирает и публикует релизы на всех платформах:
+
+- macOS (`x86_64-apple-darwin`, `aarch64-apple-darwin`) — подпись Apple Development сертификатом
+- Windows (`windows-latest`)
+- Linux (`ubuntu-22.04`)
+
+Релизы публикуются на GitHub Releases по тегу `vX.Y.Z`; обновления приложение проверяет автоматически (Tauri updater).
+
+## Структура
+
+```
+src/                 фронтенд (React)
+  core/api.ts        типизированные обёртки над Tauri-командами
+  core/i18n.tsx      словарь ru/en
+  core/registry.ts   реестр инструментов (ключи i18n)
+  components/        UI-библиотека и макет (sidebar, topbar, онбординг-тур)
+  tools/             страницы инструментов (по одному файлу на утилиту)
+src-tauri/           Rust-backend, Tauri-команды и монитор буфера обмена
+```
+
+Приватный проект «под ключ»: локализация, онбординг-тур и обновления в комплекте.

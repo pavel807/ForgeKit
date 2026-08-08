@@ -1,12 +1,19 @@
+import { useEffect, useState } from "react";
 import { CATEGORIES } from "../../core/registry";
 import { useRouter } from "../../core/Router";
 import { useI18n } from "../../core/i18n";
+import { getAppVersion } from "../../core/updater";
 import { ForgeMark } from "../ui/art";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
   const { current, navigate } = useRouter();
   const { t } = useI18n();
+  const [version, setVersion] = useState("");
+
+  useEffect(() => {
+    getAppVersion().then(setVersion);
+  }, []);
 
   return (
     <nav className="flex w-[248px] shrink-0 flex-col border-r border-border bg-background">
@@ -43,7 +50,7 @@ export function Sidebar() {
 
       <div className="border-t border-border p-3">
         <div className="rounded-xl border border-border bg-muted/40 p-3.5">
-          <p className="text-[13px] font-semibold">ForgeKit 1.4.8</p>
+          <p className="text-[13px] font-semibold">ForgeKit {version || "…"}</p>
           <p className="mt-0.5 text-xs leading-relaxed text-[var(--text-tertiary)]">
             {t("app.tagline")}
           </p>

@@ -4,6 +4,7 @@ import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, Select } from "../components/ui";
 import { api, pickFiles, pickSave } from "../core/api";
 import { formatBytes } from "../core/format";
+import { useI18n } from "../core/i18n";
 
 const FORMATS = [
   { value: "png", label: "PNG", ext: ".png" },
@@ -19,17 +20,18 @@ export default function ImageConverter() {
   const [format, setFormat] = useState("png");
   const [log, setLog] = useState<{ file: string; ok: boolean; message: string }[]>([]);
   const [busy, setBusy] = useState(false);
+  const { t } = useI18n();
 
   async function pick() {
-    const sel = await pickFiles({ multiple: true, filters: [{ name: "Изображения", extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp", "tiff"] }] });
+    const sel = await pickFiles({ multiple: true, filters: [{ name: t("files.imgFilter"), extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp", "tiff"] }] });
     if (sel?.length) setFiles(sel);
   }
 
   const fmt = FORMATS.find((f) => f.value === format)!;
 
   async function convertOne(file: string): Promise<{ file: string; ok: boolean; message: string }> {
-    const out = await pickSave(`${file.slice(file.lastIndexOf("/") + 1).replace(/\.[^.]+$/, "")}${fmt.ext}`, [{ name: "Изображения", extensions: [fmt.ext.replace(".", "")] }]);
-    if (!out) return { file, ok: false, message: "Отменено" };
+    const out = await pickSave(`${file.slice(file.lastIndexOf("/") + 1).replace(/\.[^.]+$/, "")}${fmt.ext}`, [{ name: t("files.imgFilter"), extensions: [fmt.ext.replace(".", "")] }]);
+    if (!out) return { file, ok: false, message: t("common.cancelled") };
     const r = await api.convertImage(file, out, format);
     return { file, ok: true, message: formatBytes(r.size) };
   }
@@ -50,28 +52,28 @@ export default function ImageConverter() {
       id="image-converter"
       actions={
         <Button variant="primary" leftIcon={<ImageDown size={15} />} onClick={convertAll} disabled={busy || files.length === 0}>
-          {busy ? "Конвертация…" : `Конвертировать ${files.length ? `(${files.length})` : ""}`}
+          {busy ? t("imgc.converting") : t("imgc.convert", { n: files.length })}
         </Button>
       }
-      toolbar={<Select label="" options={FORMATS.map((f) => ({ value: f.value, label: `Формат: ${f.label}` }))} value={format} onChange={(e) => setFormat(e.target.value)} />}
-      statusLeft={<span>Конвертация выполняется Rust-командой на изображении</span>}
-      statusRight={<span>{files.length} файлов</span>}
+      toolbar={<Select label="" options={FORMATS.map((f) => ({ value: f.value, label: `${t("imgc.format")}: ${f.label}` }))} value={format} onChange={(e) => setFormat(e.target.value)} />}
+      statusLeft={<span>{t("imgc.hint")}</span>}
+      statusRight={<span>{t("files.count", { n: files.length })}</span>}
     >
       {files.length === 0 ? (
         <EmptyState
           icon={<ImageDown size={24} />}
-          title="Конвертер изображений"
-          description="Выберите изображения и переведите их в PNG, JPEG, WebP, GIF, BMP или TIFF"
-          action={<Button variant="primary" leftIcon={<ImageDown size={15} />} onClick={pick}>Выбрать изображения</Button>}
+          title={t("imgc.emptyTitle")}
+          description={t("imgc.emptyDesc")}
+          action={<Button variant="primary" leftIcon={<ImageDown size={15} />} onClick={pick}>{t("files.pickImages")}</Button>}
         />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {log.length === 0 && (
             <div className="fk-panel fk-panel--row" style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ flex: 1, fontSize: 13, color: "var(--text-secondary)" }}>
-                {files.length > 0 ? `Выбрано файлов: ${files.length}` : ""}
+                {files.length > 0 ? t("files.selected", { n: files.length }) : ""}
               </span>
-              <Button onClick={pick}>Добавить ещё</Button>
+              <Button onClick={pick}>{t("files.addMore")}</Button>
             </div>
           )}
           {log.map((r, i) => (

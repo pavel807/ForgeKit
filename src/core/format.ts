@@ -32,8 +32,8 @@ export function formatDateTime(ts: number, lang: Lang = "ru"): string {
 export function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 Б";
   const units = ["Б", "КБ", "МБ", "ГБ", "ТБ"];
-  const i = Math.floor(Math.log(bytes) / Math.log(1000));
-  const val = bytes / Math.pow(1000, i);
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  const val = bytes / Math.pow(1024, i);
   return `${val >= 10 || i === 0 ? Math.round(val) : val.toFixed(1)} ${units[i]}`;
 }
 

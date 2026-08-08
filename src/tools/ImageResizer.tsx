@@ -4,15 +4,15 @@ import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, Input, Select } from "../components/ui";
 import { api, pickFiles, pickSave } from "../core/api";
 import { formatBytes } from "../core/format";
+import { useI18n } from "../core/i18n";
 
 const PRESETS = [
-  { value: "orig", label: "Оригинал" },
   { value: "1920x1080", label: "1920×1080" },
   { value: "1280x720", label: "1280×720" },
   { value: "800x600", label: "800×600" },
   { value: "512x512", label: "512×512" },
   { value: "256x256", label: "256×256" },
-  { value: "custom", label: "Свои размеры" },
+  { value: "custom", label: "" },
 ];
 
 interface ResizeRowProps {
@@ -24,11 +24,12 @@ interface ResizeRowProps {
 
 function ResizeRow({ file, ok, message, outPath }: ResizeRowProps) {
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const { t } = useI18n();
 
   async function download() {
     if (!outPath) return;
     const name = outPath.slice(outPath.lastIndexOf("/") + 1);
-    const dst = await pickSave(name, [{ name: "Изображения", extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp", "tiff"] }]);
+    const dst = await pickSave(name, [{ name: t("files.imgFilter"), extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp", "tiff"] }]);
     if (!dst) return;
     setSaveState("saving");
     try {
@@ -45,7 +46,7 @@ function ResizeRow({ file, ok, message, outPath }: ResizeRowProps) {
       <span style={{ fontSize: 12.5, color: ok ? "var(--success)" : "var(--danger)" }}>{message}</span>
       {ok && outPath ? (
         <Button variant="ghost" size="sm" leftIcon={<Download size={13} />} onClick={download} disabled={saveState === "saving"}>
-          {saveState === "saving" ? "…" : saveState === "saved" ? "Сохранено" : saveState === "error" ? "Ошибка" : "Скачать"}
+          {saveState === "saving" ? "…" : saveState === "saved" ? t("common.saved") : saveState === "error" ? t("common.error") : t("common.download")}
         </Button>
       ) : null}
     </div>
@@ -54,14 +55,15 @@ function ResizeRow({ file, ok, message, outPath }: ResizeRowProps) {
 
 export default function ImageResizer() {
   const [files, setFiles] = useState<string[]>([]);
-  const [preset, setPreset] = useState("orig");
+  const [preset, setPreset] = useState("800x600");
   const [w, setW] = useState("800");
   const [h, setH] = useState("600");
   const [log, setLog] = useState<{ file: string; ok: boolean; message: string; outPath: string | null }[]>([]);
   const [busy, setBusy] = useState(false);
+  const { t } = useI18n();
 
   async function pick() {
-    const sel = await pickFiles({ multiple: true, filters: [{ name: "Изображения", extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp", "tiff"] }] });
+    const sel = await pickFiles({ multiple: true, filters: [{ name: t("files.imgFilter"), extensions: ["png", "jpg", "jpeg", "webp", "gif", "bmp", "tiff"] }] });
     if (sel?.length) setFiles(sel);
   }
 
@@ -69,14 +71,12 @@ export default function ImageResizer() {
     if (preset === "custom") {
       return [Math.max(1, parseInt(w, 10) || 1), Math.max(1, parseInt(h, 10) || 1)];
     }
-    if (preset === "orig") return [0, 0];
     const [pw, ph] = preset.toLowerCase().split("x");
     return [Math.max(1, parseInt(pw, 10) || 1), Math.max(1, parseInt(ph, 10) || 1)];
   }
 
   async function resizeAll() {
     const [tw, th] = targetSize();
-    if (tw === 0) return;
     setBusy(true);
     const out: { file: string; ok: boolean; message: string; outPath: string | null }[] = [];
     for (const f of files) {
@@ -87,7 +87,7 @@ export default function ImageResizer() {
       out.push({
         file: f,
         ok: r.ok,
-        message: r.ok ? `${r.res.width}×${r.res.height} · ${formatBytes(r.res.size)}` : `Ошибка: ${r.err}`,
+        message: r.ok ? `${r.res.width}×${r.res.height} · ${formatBytes(r.res.size)}` : `${t("common.error")}: ${r.err}`,
         outPath: r.ok ? r.res.path : null,
       });
     }
@@ -100,12 +100,12 @@ export default function ImageResizer() {
       id="image-resizer"
       actions={
         <Button variant="primary" leftIcon={<Crop size={15} />} onClick={resizeAll} disabled={busy || files.length === 0}>
-          {busy ? "Изменение…" : "Изменить размер"}
+          {busy ? t("imgr.resizing") : t("imgr.resize")}
         </Button>
       }
       toolbar={
         <>
-          <Select label="" options={PRESETS} value={preset} onChange={(e) => setPreset(e.target.value)} />
+          <Select label="" options={PRESETS.map((p) => ({ value: p.value, label: p.label || t("imgr.custom") }))} value={preset} onChange={(e) => setPreset(e.target.value)} />
           {preset === "custom" && (
             <>
               <Input className="mono-value" value={w} onChange={(e) => setW(e.target.value)} style={{ width: 80 }} />
@@ -115,21 +115,21 @@ export default function ImageResizer() {
           )}
         </>
       }
-      statusLeft={<span>Пропорции сохраняются автоматически</span>}
-      statusRight={<span>Файлов: {files.length}</span>}
+      statusLeft={<span>{t("imgr.hint")}</span>}
+      statusRight={<span>{t("files.count", { n: files.length })}</span>}
     >
       {files.length === 0 ? (
         <EmptyState
           icon={<Crop size={24} />}
-          title="Изменение размера изображений"
-          description="Выберите изображения и укажите целевой размер — копия сохранится рядом с оригиналом"
-          action={<Button variant="primary" leftIcon={<Crop size={15} />} onClick={pick}>Выбрать изображения</Button>}
+          title={t("imgr.emptyTitle")}
+          description={t("imgr.emptyDesc")}
+          action={<Button variant="primary" leftIcon={<Crop size={15} />} onClick={pick}>{t("files.pickImages")}</Button>}
         />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div className="fk-panel fk-panel--row" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ flex: 1, fontSize: 13, color: "var(--text-secondary)" }}>Выбрано файлов: {files.length}</span>
-            <Button onClick={pick}>Добавить ещё</Button>
+            <span style={{ flex: 1, fontSize: 13, color: "var(--text-secondary)" }}>{t("files.selected", { n: files.length })}</span>
+            <Button onClick={pick}>{t("files.addMore")}</Button>
           </div>
           {log.map((r, i) => (
             <ResizeRow key={i} file={r.file} ok={r.ok} message={r.message} outPath={r.outPath} />

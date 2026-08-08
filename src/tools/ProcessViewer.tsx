@@ -2,13 +2,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Cpu } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, SearchInput } from "../components/ui";
-import { api, isTauri, type ProcessEntry } from "../core/api";import { formatBytes } from "../core/format";
+import { api, isTauri, type ProcessEntry } from "../core/api";
+import { formatBytes } from "../core/format";
+import { useI18n } from "../core/i18n";
 
 export default function ProcessViewer() {
   const [procs, setProcs] = useState<ProcessEntry[]>([]);
   const [query, setQuery] = useState("");
   const [busy, setBusy] = useState(false);
   const [filtered, setFiltered] = useState<ProcessEntry[]>([]);
+  const { t } = useI18n();
 
   const load = useCallback(async (showBusy = true) => {
     if (showBusy) setBusy(true);
@@ -40,22 +43,22 @@ export default function ProcessViewer() {
       id="process-viewer"
       actions={
         <Button variant="primary" leftIcon={<Cpu size={15} />} onClick={() => load()} disabled={busy}>
-          {busy ? "Загрузка…" : "Обновить список"}
+          {busy ? t("proc.loading") : t("proc.refresh")}
         </Button>
       }
-      toolbar={<SearchInput placeholder="Поиск по имени или PID…" value={query} onChange={(e) => setQuery(e.target.value)} style={{ width: 280 }} />}
-      statusLeft={<span>Процессов: {procs.length} · показано: {sortProcs.length} · обновляется каждые 2 с</span>}
-      statusRight={sortProcs.length > 0 ? <span>Память всего: {formatBytes(sortProcs.reduce((a, p) => a + p.mem, 0))}</span> : undefined}
+      toolbar={<SearchInput placeholder={t("proc.search")} value={query} onChange={(e) => setQuery(e.target.value)} style={{ width: 280 }} />}
+      statusLeft={<span>{t("proc.stats", { n: procs.length, shown: sortProcs.length })}</span>}
+      statusRight={sortProcs.length > 0 ? <span>{t("proc.memTotal", { n: formatBytes(sortProcs.reduce((a, p) => a + p.mem, 0)) })}</span> : undefined}
     >
       {sortProcs.length === 0 ? (
-        <EmptyState icon={<Cpu size={24} />} title="Список процессов" description="Показывает запущенные приложения и использование памяти" />
+        <EmptyState icon={<Cpu size={24} />} title={t("proc.emptyTitle")} description={t("proc.emptyDesc")} />
       ) : (
         <div className="fk-panel" style={{ overflow: "hidden" }}>
           <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 110px 110px", padding: "10px 14px", borderBottom: "1px solid var(--border)", fontSize: 11, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-tertiary)" }}>
             <span>PID</span>
-            <span>Процесс</span>
-            <span style={{ textAlign: "right" }}>Память</span>
-            <span style={{ textAlign: "right" }}>Статус</span>
+            <span>{t("proc.name")}</span>
+            <span style={{ textAlign: "right" }}>{t("proc.mem")}</span>
+            <span style={{ textAlign: "right" }}>{t("proc.status")}</span>
           </div>
           <div style={{ maxHeight: "calc(100vh - 320px)", overflow: "auto" }}>
             {sortProcs.map((p) => (

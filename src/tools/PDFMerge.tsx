@@ -3,8 +3,10 @@ import { FileStack } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState } from "../components/ui";
 import { api, pickFiles, pickSave } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function PDFMerge() {
+  const { t } = useI18n();
   const [files, setFiles] = useState<string[]>([]);
   const [log, setLog] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -19,7 +21,7 @@ export default function PDFMerge() {
     if (!out) return;
     setBusy(true);
     const r = await api.pdfMerge(files, out).catch(() => null);
-    setLog([r ? `OK: ${out} (${r.pages} стр.)` : "Ошибка: не удалось объединить файлы"]);
+    setLog([r ? t("pdfm.merged", { out, pages: r.pages }) : `${t("common.error")}: ${t("pdfm.mergeFailed")}`]);
     setBusy(false);
   }
 
@@ -28,24 +30,24 @@ export default function PDFMerge() {
       id="pdf-merge"
       actions={
         <Button variant="primary" leftIcon={<FileStack size={15} />} onClick={merge} disabled={busy || files.length < 2}>
-          {busy ? "Объединение…" : "Объединить"}
+          {busy ? t("pdfm.merging") : t("pdfm.merge")}
         </Button>
       }
-      statusLeft={<span>Порядок файлов = порядок страниц</span>}
-      statusRight={<span>Файлов: {files.length}</span>}
+      statusLeft={<span>{t("pdfm.hint")}</span>}
+      statusRight={<span>{t("pdfm.files", { n: files.length })}</span>}
     >
       {files.length === 0 ? (
         <EmptyState
           icon={<FileStack size={24} />}
-          title="Объединение PDF"
-          description="Склейте несколько PDF-файлов в один, сохранив порядок страниц"
-          action={<Button variant="primary" leftIcon={<FileStack size={15} />} onClick={pick}>Выбрать PDF-файлы</Button>}
+          title={t("pdfm.emptyTitle")}
+          description={t("pdfm.emptyDesc")}
+          action={<Button variant="primary" leftIcon={<FileStack size={15} />} onClick={pick}>{t("pdfm.pickFiles")}</Button>}
         />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div className="fk-panel fk-panel--row" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ flex: 1, fontSize: 13, color: "var(--text-secondary)" }}>Выбрано файлов: {files.length} — минимум 2 для объединения</span>
-            <Button onClick={pick}>Добавить ещё</Button>
+            <span style={{ flex: 1, fontSize: 13, color: "var(--text-secondary)" }}>{t("pdfm.selected", { n: files.length })}</span>
+            <Button onClick={pick}>{t("files.addMore")}</Button>
           </div>
           {files.map((f, i) => (
             <div key={`${f}-${i}`} className="fk-list__item" style={{ border: "1px solid var(--border-soft)", borderRadius: "var(--radius)" }}>

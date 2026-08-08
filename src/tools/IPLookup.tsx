@@ -1,24 +1,30 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Globe } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState } from "../components/ui";
 import { api, isTauri } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function IPLookup() {
   const [ip, setIp] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
+  const seqRef = useRef(0);
+  const { t, lang } = useI18n();
 
   const load = useCallback(async (showBusy = true) => {
+    const seq = ++seqRef.current;
     if (showBusy) setBusy(true);
     setError(null);
-    const r = await api.publicIp().catch((e) => String(e));
-    if (typeof r === "string" && r.includes(" ")) {
-      setError(r);
+    try {
+      const r = await api.publicIp();
+      if (seq !== seqRef.current) return;
+      setIp(r);
+    } catch (err) {
+      if (seq !== seqRef.current) return;
+      setError(String(err));
       setIp(null);
-    } else {
-      setIp(r as string);
     }
     setUpdatedAt(Date.now());
     if (showBusy) setBusy(false);
@@ -36,18 +42,18 @@ export default function IPLookup() {
       id="ip-lookup"
       actions={
         <Button variant="primary" leftIcon={<Globe size={15} />} onClick={() => load()} disabled={busy}>
-          {busy ? "Проверка…" : "Определить IP"}
+          {busy ? t("ip.checking") : t("ip.check")}
         </Button>
       }
-      statusLeft={<span>Внешний адрес определяется через api.ipify.org · обновляется каждые 10 с</span>}
-      statusRight={ip ? <span>Обновлено: {updatedAt ? new Date(updatedAt).toLocaleTimeString("ru-RU") : "—"}</span> : undefined}
+      statusLeft={<span>{t("ip.hint")}</span>}
+      statusRight={ip ? <span>{t("ip.updated", { at: updatedAt ? new Date(updatedAt).toLocaleTimeString(lang === "en" ? "en-US" : "ru-RU") : "—" })}</span> : undefined}
     >
       {!ip && !error ? (
-        <EmptyState icon={<Globe size={24} />} title="Определение IP-адреса" description="Узнайте ваш публичный IPv4-адрес" />
+        <EmptyState icon={<Globe size={24} />} title={t("ip.emptyTitle")} description={t("ip.emptyDesc")} />
       ) : (
         <div className="fk-panel" style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
           <div className="info-row">
-            <span className="info-row__label">Ваш IP</span>
+            <span className="info-row__label">{t("ip.yourIp")}</span>
             <span className="info-row__value mono-value" style={{ fontSize: 20 }}>{ip ?? "—"}</span>
           </div>
           {error && <div className="error-text">{error}</div>}

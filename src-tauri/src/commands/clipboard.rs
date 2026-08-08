@@ -3,8 +3,13 @@
 use crate::db::{self, AppDb};
 use rusqlite::{params, OptionalExtension};
 use serde::Serialize;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use tauri::{AppHandle, Manager, State};
 use tauri_plugin_clipboard_manager::ClipboardExt;
+
+/// Флаг включения фонового мониторинга буфера обмена (управляется из настроек)
+pub struct MonitorEnabled(pub Arc<AtomicBool>);
 
 #[derive(Debug, Serialize, Clone)]
 pub struct ClipboardItem {
@@ -231,6 +236,18 @@ fn sha256_digest(bytes: &[u8]) -> [u8; 32] {
     hasher.finalize().into()
 }
 
+/// Включение/выключение фонового мониторинга буфера обмена
+#[tauri::command]
+pub fn clipboard_monitor_set_enabled(app: AppHandle, state: State<AppDb>, enabled: bool) -> Result<(), String> {
+    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    db::set_setting(&conn, "clipboard_monitor", if enabled { "true" } else { "false" }).map_err(|e| e.to_string())?;
+    drop(conn);
+    if let Some(flag) = app.try_state::<MonitorEnabled>() {
+        flag.0.store(enabled, Ordering::Relaxed);
+    }
+    Ok(())
+}
+
 /// Фоновый монитор буфера обмена: опрашивает системный буфер и сохраняет
 /// изменения в историю (текст и изображения). Работает на macOS, Windows и Linux.
 pub fn start_monitor<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<(), String> {
@@ -251,6 +268,26 @@ pub fn start_monitor<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<(), 
                 std::thread::sleep(std::time::Duration::from_millis(700));
 
                 let Some(state) = app.try_state::<AppDb>() else { continue; };
+                let monitor_on = app
+                    .try_state::<MonitorEnabled>()
+                    .map(|f| f.0.load(Ordering::Relaxed))
+                    .unwrap_or(true);
+
+                if !monitor_on {
+                    /* Мониторинг выключен: не сохраняем в историю, но держим
+                       «известное» состояние буфера в актуальном виде, чтобы при
+                       включении не залить в историю всё скопированное за это время. */
+                    if let Ok(text) = app.clipboard().read_text() {
+                        if !text.trim().is_empty() {
+                            last_text = Some(text);
+                        }
+                    }
+                    if let Ok(img) = app.clipboard().read_image() {
+                        last_image = Some(img.rgba().to_vec());
+                    }
+                    continue;
+                }
+
                 let mut captured = false;
 
                 /* Текст */

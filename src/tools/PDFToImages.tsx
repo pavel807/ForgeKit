@@ -3,8 +3,10 @@ import { FileOutput } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, EmptyState, Input } from "../components/ui";
 import { api, pickDirectory, pickFiles } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function PDFToImages() {
+  const { t } = useI18n();
   const [file, setFile] = useState<string | null>(null);
   const [dpi, setDpi] = useState("150");
   const [done, setDone] = useState<string[]>([]);
@@ -32,33 +34,33 @@ export default function PDFToImages() {
       id="pdf-to-images"
       actions={
         <Button variant="primary" leftIcon={<FileOutput size={15} />} onClick={convert} disabled={busy || !file}>
-          {busy ? "Рендер…" : "Конвертировать в PNG"}
+          {busy ? t("pdftoi.rendering") : t("pdftoi.convert")}
         </Button>
       }
       toolbar={
         <Input className="mono-value" placeholder="DPI" value={dpi} onChange={(e) => setDpi(e.target.value)} style={{ width: 90 }} />
       }
-      statusLeft={<span>Требуется poppler (pdftoppm) в PATH</span>}
+      statusLeft={<span>{t("pdftoi.hint")}</span>}
       statusRight={file ? <span className="mono-value" style={{ fontSize: 11.5 }}>{file.slice(file.lastIndexOf("/") + 1)}</span> : undefined}
     >
       {!file ? (
         <EmptyState
           icon={<FileOutput size={24} />}
-          title="PDF в изображения"
-          description="Рендерит каждую страницу PDF в отдельный PNG-файл (через pdftoppm)"
-          action={<Button variant="primary" leftIcon={<FileOutput size={15} />} onClick={pickFile}>Выбрать PDF-файл</Button>}
+          title={t("pdftoi.emptyTitle")}
+          description={t("pdftoi.emptyDesc")}
+          action={<Button variant="primary" leftIcon={<FileOutput size={15} />} onClick={pickFile}>{t("pdftoi.pickFile")}</Button>}
         />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div className="fk-panel fk-panel--row" style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <span className="mono-value" style={{ flex: 1, fontSize: 12.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file}</span>
-            <Button onClick={pickFile}>Другой файл</Button>
+            <Button onClick={pickFile}>{t("pdftoi.otherFile")}</Button>
           </div>
           {error && <div className="error-text">{error}</div>}
           {done.length > 0 && (
             <div className="fk-panel" style={{ padding: "14px 16px" }}>
               <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-tertiary)", marginBottom: 8 }}>
-                Создано файлов: {done.length}
+                {t("pdftoi.created", { n: done.length })}
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {done.map((name) => (

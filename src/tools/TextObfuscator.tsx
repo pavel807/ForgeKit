@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { CopyButton, SegmentedControl } from "../components/ui";
 import { api, useRust } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function TextObfuscator() {
+  const { t } = useI18n();
   const [tab, setTab] = useState<"hide" | "reveal">("hide");
   const [input, setInput] = useState("");
 
@@ -18,14 +20,14 @@ export default function TextObfuscator() {
     <ToolPage
       id="text-obfuscator"
       actions={<CopyButton text={result} disabled={!result} />}
-      toolbar={<SegmentedControl value={tab} onChange={(v) => setTab(v as "hide" | "reveal")} items={[{ value: "hide", label: "Скрыть текст" }, { value: "reveal", label: "Показать скрытое" }]} />}
-      statusLeft={<span>Обратимое преобразование букв в комбинации цифр и символов</span>}
-      statusRight={result ? <span>{result.length} символов</span> : undefined}
+      toolbar={<SegmentedControl value={tab} onChange={(v) => setTab(v as "hide" | "reveal")} items={[{ value: "hide", label: t("obfuscate.hide") }, { value: "reveal", label: t("obfuscate.reveal") }]} />}
+      statusLeft={<span>{t("obfuscate.hint")}</span>}
+      statusRight={result ? <span>{t("obfuscate.chars", { n: result.length })}</span> : undefined}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
         <textarea
           className="fk-textarea mono-value"
-          placeholder={tab === "hide" ? "Публичный текст для маскировки…" : "Замаскированный текст…"}
+          placeholder={tab === "hide" ? t("obfuscate.hidePlaceholder") : t("obfuscate.revealPlaceholder")}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           spellCheck={false}

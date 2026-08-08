@@ -759,7 +759,7 @@ pub fn color_convert(hex: String) -> Result<Option<ColorResult>, String> {
         } else {
             ((rf - gf) / d + 4.0) / 6.0
         };
-        format!("{}, {}%", (h_deg * 360.0).round() as i64, (s * 100.0).round() as i64)
+        format!("{}, {}%, {}%", (h_deg * 360.0).round() as i64, (s * 100.0).round() as i64, (l * 100.0).round() as i64)
     };
 
     let k = 1.0 - max;

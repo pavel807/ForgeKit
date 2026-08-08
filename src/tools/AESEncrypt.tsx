@@ -3,8 +3,10 @@ import { Lock } from "lucide-react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, CopyButton, SegmentedControl } from "../components/ui";
 import { api } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function AESEncrypt() {
+  const { t } = useI18n();
   const [mode, setMode] = useState<"encrypt" | "decrypt">("encrypt");
   const [key, setKey] = useState("");
   const [input, setInput] = useState("");
@@ -14,7 +16,7 @@ export default function AESEncrypt() {
 
   async function run() {
     if (!key || !input) {
-      setError("Введите ключ и данные");
+      setError(t("aes.enterKeyData"));
       return;
     }
     setBusy(true);
@@ -36,18 +38,18 @@ export default function AESEncrypt() {
       id="aes-encrypt"
       actions={
         <Button variant="primary" leftIcon={<Lock size={15} />} onClick={run} disabled={busy}>
-          {busy ? "Обработка…" : mode === "encrypt" ? "Зашифровать" : "Расшифровать"}
+          {busy ? t("aes.processing") : mode === "encrypt" ? t("aes.encrypt") : t("aes.decrypt")}
         </Button>
       }
-      toolbar={<SegmentedControl value={mode} onChange={(v) => setMode(v as "encrypt" | "decrypt")} items={[{ value: "encrypt", label: "Шифрование" }, { value: "decrypt", label: "Расшифрование" }]} />}
-      statusLeft={<span>AES-256-GCM, ключ выводится из пароля через PBKDF2 (ядро Rust)</span>}
-      statusRight={input ? <span>{bytes} байт</span> : undefined}
+      toolbar={<SegmentedControl value={mode} onChange={(v) => setMode(v as "encrypt" | "decrypt")} items={[{ value: "encrypt", label: t("aes.encryptMode") }, { value: "decrypt", label: t("aes.decryptMode") }]} />}
+      statusLeft={<span>{t("aes.hint")}</span>}
+      statusRight={input ? <span>{t("common.bytes", { n: bytes })}</span> : undefined}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
-        <input className="fk-input mono-value" type="password" placeholder="Пароль (ключ)" value={key} onChange={(e) => setKey(e.target.value)} autoComplete="off" style={{ width: 320 }} />
+        <input className="fk-input mono-value" type="password" placeholder={t("aes.keyPlaceholder")} value={key} onChange={(e) => setKey(e.target.value)} autoComplete="off" style={{ width: 320 }} />
         <textarea
           className="fk-textarea mono-value"
-          placeholder={mode === "encrypt" ? "Текст для шифрования…" : "Base64-зашифрованные данные…"}
+          placeholder={mode === "encrypt" ? t("aes.encryptPlaceholder") : t("aes.decryptPlaceholder")}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           spellCheck={false}

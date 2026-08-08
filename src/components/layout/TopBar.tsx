@@ -14,7 +14,7 @@ export function WindowControls() {
   if (!isTauri()) return null;
   const { t } = useI18n();
   return (
-    <div className="flex shrink-0 items-center gap-1" aria-label="Управление окном">
+    <div className="flex shrink-0 items-center gap-1" aria-label={t("app.windowControls")}>
       <button type="button" className={winBtn} title={t("app.minimize")} onClick={() => getCurrentWindow().minimize()}>
         <Minus size={15} />
       </button>

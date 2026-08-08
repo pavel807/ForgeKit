@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Checkbox } from "../components/ui";
 import { api, useRust } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function JSONDiff() {
+  const { t } = useI18n();
   const [left, setLeft] = useState("");
   const [right, setRight] = useState("");
   const [ignoreWhitespace, setIgnoreWhitespace] = useState(false);
@@ -18,20 +20,20 @@ export default function JSONDiff() {
     <ToolPage
       id="json-diff"
       toolbar={
-        <Checkbox label="Нормализовать пробелы" checked={ignoreWhitespace} onChange={(v) => setIgnoreWhitespace(v)} />
+        <Checkbox label={t("jsondiff.normalizeWhitespace")} checked={ignoreWhitespace} onChange={(v) => setIgnoreWhitespace(v)} />
       }
-      statusLeft={<span>Вставьте две версии текста или JSON слева и справа</span>}
+      statusLeft={<span>{t("jsondiff.hint")}</span>}
       statusRight={<span>+ {adds} · − {dels}</span>}
     >
       <div className="diff-grid">
         <div className="diff-col">
-          <textarea className="fk-textarea mono-value" placeholder="Версия A" value={left} onChange={(e) => setLeft(e.target.value)} spellCheck={false} />
+          <textarea className="fk-textarea mono-value" placeholder={t("jsondiff.versionA")} value={left} onChange={(e) => setLeft(e.target.value)} spellCheck={false} />
         </div>
         <div className="diff-col">
-          <textarea className="fk-textarea mono-value" placeholder="Версия B" value={right} onChange={(e) => setRight(e.target.value)} spellCheck={false} />
+          <textarea className="fk-textarea mono-value" placeholder={t("jsondiff.versionB")} value={right} onChange={(e) => setRight(e.target.value)} spellCheck={false} />
         </div>
         <div className="diff-result" style={{ gridColumn: "1 / -1" }}>
-          {lines.length === 0 && <div style={{ color: "var(--text-tertiary)", textAlign: "center", paddingTop: 40 }}>Различий нет</div>}
+          {lines.length === 0 && <div style={{ color: "var(--text-tertiary)", textAlign: "center", paddingTop: 40 }}>{t("jsondiff.noDiff")}</div>}
           {lines.map((l, i) => (
             <div
               key={i}

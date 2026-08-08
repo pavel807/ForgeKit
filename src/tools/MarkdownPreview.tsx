@@ -1,9 +1,16 @@
 import { useMemo, useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { SegmentedControl } from "../components/ui";
+import { useI18n } from "../core/i18n";
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/`/g, "&#96;");
 }
 
 function renderMarkdown(src: string): string {
@@ -58,7 +65,13 @@ function renderMarkdown(src: string): string {
       continue;
     }
     const bold = escapeHtml(line).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/`([^`]+)`/g, "<code>$1</code>");
-    const link = bold.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+    const link = bold.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
+      const href = url.trim();
+      if (/^(https?|mailto):/i.test(href) || href.startsWith("#")) {
+        return `<a href="${href}" target="_blank" rel="noreferrer">${text}</a>`;
+      }
+      return `<span>[${text}](${url})</span>`;
+    });
     out.push(`<p class="md-p">${link}</p>`);
   }
   closeList();
@@ -68,6 +81,7 @@ function renderMarkdown(src: string): string {
 export default function MarkdownPreview() {
   const [input, setInput] = useState("# Заголовок\n\nНапишите **markdown** здесь…\n\n- пункт 1\n- пункт 2\n\n```js\nconst x = 1;\n```");
   const [mode, setMode] = useState<"split" | "preview">("split");
+  const { t } = useI18n();
 
   const html = useMemo(() => renderMarkdown(input), [input]);
   const wordCount = useMemo(() => input.trim().split(/\s+/).filter(Boolean).length, [input]);
@@ -75,9 +89,9 @@ export default function MarkdownPreview() {
   return (
     <ToolPage
       id="markdown-preview"
-      toolbar={<SegmentedControl value={mode} onChange={(v) => setMode(v as "split" | "preview")} items={[{ value: "split", label: "Редактор + предпросмотр" }, { value: "preview", label: "Только предпросмотр" }]} />}
-      statusLeft={<span>Поддерживается: заголовки, списки, код, ссылки, жирный текст</span>}
-      statusRight={<span>Слов: {wordCount}</span>}
+      toolbar={<SegmentedControl value={mode} onChange={(v) => setMode(v as "split" | "preview")} items={[{ value: "split", label: t("md.split") }, { value: "preview", label: t("md.preview") }]} />}
+      statusLeft={<span>{t("md.hint")}</span>}
+      statusRight={<span>{t("md.words", { n: wordCount })}</span>}
     >
       {mode === "split" ? (
         <div className="split-editor">

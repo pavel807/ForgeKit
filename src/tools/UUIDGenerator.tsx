@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, CopyButton, SegmentedControl } from "../components/ui";
 import { api } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function UUIDGenerator() {
+const { t } = useI18n();
 const count = 10;
   const [version, setVersion] = useState<"v4" | "v7">("v4");
   const [uuids, setUuids] = useState<string[]>([]);
@@ -23,10 +25,10 @@ const count = 10;
   return (
     <ToolPage
       id="uuid"
-      actions={<Button variant="primary" onClick={regenerate}>Сгенерировать снова</Button>}
+      actions={<Button variant="primary" onClick={regenerate}>{t("uuid.regenerate")}</Button>}
       toolbar={<SegmentedControl value={version} onChange={(v) => { const u = v as "v4" | "v7"; setVersion(u); generate(u, count); }} items={[{ value: "v4", label: "UUID v4" }, { value: "v7", label: "UUID v7" }]} />}
-      statusLeft={<span>Версия {version.toUpperCase()} · timestamp-based для v7</span>}
-      statusRight={<span>Сгенерировано: {uuids.length}</span>}
+      statusLeft={<span>{t("uuid.versioning", { v: version.toUpperCase() })}</span>}
+      statusRight={<span>{t("uuid.generated", { n: uuids.length })}</span>}
     >
       <div className="uuid-grid">
         {uuids.map((u, i) => (

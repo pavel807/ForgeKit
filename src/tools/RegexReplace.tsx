@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { CopyButton, Input } from "../components/ui";
+import { useI18n } from "../core/i18n";
 
 export default function RegexReplace() {
+  const { t } = useI18n();
   const [pattern, setPattern] = useState("");
   const [replacement, setReplacement] = useState("");
   const [input, setInput] = useState("");
@@ -36,8 +38,8 @@ export default function RegexReplace() {
       actions={<CopyButton text={output} disabled={!output} />}
       toolbar={
         <>
-          <Input className="mono-value" placeholder="Шаблон поиска" value={pattern} onChange={(e) => setPattern(e.target.value)} style={{ width: 200 }} />
-          <Input className="mono-value" placeholder="Замена ($1, $2…)" value={replacement} onChange={(e) => setReplacement(e.target.value)} style={{ width: 200 }} />
+          <Input className="mono-value" placeholder={t("regexreplace.patternPlaceholder")} value={pattern} onChange={(e) => setPattern(e.target.value)} style={{ width: 200 }} />
+          <Input className="mono-value" placeholder={t("regexreplace.replacementPlaceholder")} value={replacement} onChange={(e) => setReplacement(e.target.value)} style={{ width: 200 }} />
           {["g", "i", "m"].map((f) => (
             <button key={f} className={`fk-chip${flags.includes(f) ? " fk-chip--on" : ""}`} onClick={() => setFlags((prev) => (prev.includes(f) ? prev.replace(f, "") : prev + f))}>
               {f}
@@ -45,13 +47,13 @@ export default function RegexReplace() {
           ))}
         </>
       }
-      statusLeft={<span>{error ? `Ошибка: ${error}` : `Совпадений: ${matchCount}`}</span>}
-      statusRight={output ? <span>{input.length} → {output.length} символов</span> : undefined}
+      statusLeft={<span>{error ? `${t("common.error")}: ${error}` : t("regexreplace.matches", { n: matchCount })}</span>}
+      statusRight={output ? <span>{t("regexreplace.stats", { a: input.length, b: output.length })}</span> : undefined}
     >
       <div className="split-editor">
-        <textarea className="fk-textarea mono-value" placeholder="Исходный текст…" value={input} onChange={(e) => setInput(e.target.value)} spellCheck={false} style={{ border: error ? "1px solid var(--danger)" : undefined }} />
+        <textarea className="fk-textarea mono-value" placeholder={t("regexreplace.inputPlaceholder")} value={input} onChange={(e) => setInput(e.target.value)} spellCheck={false} style={{ border: error ? "1px solid var(--danger)" : undefined }} />
         <div className="split-editor__divider" />
-        <textarea className="fk-textarea mono-value" value={output} readOnly placeholder="Результат замены" spellCheck={false} />
+        <textarea className="fk-textarea mono-value" value={output} readOnly placeholder={t("regexreplace.outputPlaceholder")} spellCheck={false} />
       </div>
     </ToolPage>
   );

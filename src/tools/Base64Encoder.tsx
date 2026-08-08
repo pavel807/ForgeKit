@@ -2,8 +2,10 @@ import { useState } from "react";
 import { ToolPage } from "../components/layout/ToolPage";
 import { Button, CopyButton, SegmentedControl } from "../components/ui";
 import { api, useRust } from "../core/api";
+import { useI18n } from "../core/i18n";
 
 export default function Base64Encoder() {
+  const { t } = useI18n();
   const [direction, setDirection] = useState<"encode" | "decode">("encode");
   const [input, setInput] = useState("");
 
@@ -19,15 +21,15 @@ export default function Base64Encoder() {
   return (
     <ToolPage
       id="base64"
-      actions={<Button variant="primary" onClick={() => setInput(output)} disabled={!output}>Применить</Button>}
-      toolbar={<SegmentedControl value={direction} onChange={(v) => setDirection(v as "encode" | "decode")} items={[{ value: "encode", label: "Закодировать" }, { value: "decode", label: "Декодировать" }]} />}
-      statusLeft={<span>{error ? "Некорректные данные" : "UTF-8 ↔ Base64 (ядро Rust)"}</span>}
-      statusRight={<span>{input ? `Вход: ${inBytes} байт · выход: ${outBytes} байт` : ""}</span>}
+      actions={<Button variant="primary" onClick={() => setInput(output)} disabled={!output}>{t("b64.apply")}</Button>}
+      toolbar={<SegmentedControl value={direction} onChange={(v) => setDirection(v as "encode" | "decode")} items={[{ value: "encode", label: t("b64.encode") }, { value: "decode", label: t("b64.decode") }]} />}
+      statusLeft={<span>{error ? t("b64.invalid") : t("b64.hint")}</span>}
+      statusRight={<span>{input ? t("b64.stats", { in: inBytes, out: outBytes }) : ""}</span>}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
         <textarea
           className="fk-textarea mono-value"
-          placeholder={direction === "encode" ? "Текст для кодирования…" : "Base64-строка для декодирования…"}
+          placeholder={direction === "encode" ? t("b64.inputPlaceholder") : t("b64.decodePlaceholder")}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           spellCheck={false}
