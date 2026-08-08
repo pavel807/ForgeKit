@@ -43,7 +43,7 @@ export function Sidebar() {
 
       <div className="border-t border-border p-3">
         <div className="rounded-xl border border-border bg-muted/40 p-3.5">
-          <p className="text-[13px] font-semibold">ForgeKit 1.4.7</p>
+          <p className="text-[13px] font-semibold">ForgeKit 1.4.8</p>
           <p className="mt-0.5 text-xs leading-relaxed text-[var(--text-tertiary)]">
             {t("app.tagline")}
           </p>

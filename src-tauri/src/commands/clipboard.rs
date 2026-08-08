@@ -100,16 +100,36 @@ pub fn clipboard_get(state: State<AppDb>, id: i64) -> Result<ClipboardFull, Stri
 #[tauri::command]
 pub fn clipboard_delete(state: State<AppDb>, id: i64) -> Result<(), String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let data_path: Option<String> = conn
+        .query_row(
+            "SELECT data_path FROM clipboard_history WHERE id = ?1",
+            params![id],
+            |r| r.get(0),
+        )
+        .optional()
+        .map_err(|e| e.to_string())?;
     conn.execute("DELETE FROM clipboard_history WHERE id = ?1", params![id])
         .map_err(|e| e.to_string())?;
-    let _ = std::fs::remove_file(format!("{id}"));
+    if let Some(path) = data_path {
+        let _ = std::fs::remove_file(path);
+    }
     Ok(())
 }
 
 #[tauri::command]
 pub fn clipboard_clear(state: State<AppDb>) -> Result<(), String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let paths: Vec<String> = conn
+        .prepare("SELECT data_path FROM clipboard_history WHERE data_path IS NOT NULL")
+        .map_err(|e| e.to_string())?
+        .query_map([], |r| r.get::<_, String>(0))
+        .map_err(|e| e.to_string())?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| e.to_string())?;
     conn.execute("DELETE FROM clipboard_history", []).map_err(|e| e.to_string())?;
+    for p in paths {
+        let _ = std::fs::remove_file(p);
+    }
     Ok(())
 }
 
@@ -217,8 +237,15 @@ pub fn start_monitor<R: tauri::Runtime>(app: tauri::AppHandle<R>) -> Result<(), 
     std::thread::Builder::new()
         .name("clipboard-monitor".into())
         .spawn(move || {
-            let mut last_text: Option<String> = None;
-            let mut last_image: Option<Vec<u8>> = None;
+            /* Текущее состояние буфера считаем «уже известным»: не сохраняем его
+               в историю, иначе после очистки истории запись вернётся при следующей
+               проверке (и при первом запуске в историю попадёт старый буфер). */
+            let mut last_text: Option<String> = app
+                .clipboard()
+                .read_text()
+                .ok()
+                .filter(|t| !t.trim().is_empty());
+            let mut last_image: Option<Vec<u8>> = app.clipboard().read_image().ok().map(|img| img.rgba().to_vec());
 
             loop {
                 std::thread::sleep(std::time::Duration::from_millis(700));
