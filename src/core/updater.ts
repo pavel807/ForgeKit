@@ -2,7 +2,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
-const FALLBACK_VERSION = "1.5.0";
+const FALLBACK_VERSION = "1.5.1";
 const REPO = "pavel807/ForgeKit";
 
 export type UpdateStatus = "checking" | "up-to-date" | "update" | "error";

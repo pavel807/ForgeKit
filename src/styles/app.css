@@ -520,9 +520,12 @@
 }
 .http-grid .fk-panel > div:first-child {
   min-width: 0;
+  flex-wrap: wrap;
 }
 .http-grid .fk-badge {
-  min-width: 0;
+  display: inline-block;
+  flex: 0 1 auto;
+  width: max-content;
   max-width: 100%;
   height: auto;
   min-height: 20px;
