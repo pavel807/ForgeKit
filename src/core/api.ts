@@ -233,6 +233,15 @@ export interface SvgResult {
   after: number;
 }
 
+export interface PluginMeta {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  author: string;
+  icon: string | null;
+}
+
 export const api = {
   /* --- Буфер обмена --- */
   clipboardList: (filter: string, query: string) =>
@@ -326,11 +335,27 @@ export const api = {
   /* --- Настройки --- */
   settingsGet: (key: string) => invoke<string | null>("settings_get", { key }),
   settingsSet: (key: string, value: string) => invoke<void>("settings_set", { key, value }),
+
+  /* --- Модули и плагины --- */
+  modulesGet: () => invoke<[string, boolean][]>("modules_get"),
+  moduleSet: (id: string, enabled: boolean) => invoke<void>("settings_set", { key: `module:${id}`, value: enabled ? "1" : "0" }),
+  pluginList: () => invoke<PluginMeta[]>("plugin_list"),
+  pluginInstall: (folderPath: string) => invoke<PluginMeta>("plugin_install", { folderPath }),
+  pluginInstallZip: (zipPath: string) => invoke<PluginMeta>("plugin_install_zip", { zipPath }),
+  pluginUninstall: (id: string) => invoke<void>("plugin_uninstall", { id }),
+  pluginBaseUrl: (id: string) => invoke<string>("plugin_base_url", { id }),
 };
 
 /* --- Является ли окружение Tauri --- */
 export function isTauri(): boolean {
   return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+}
+
+/** Официальные плагины (автор ForgeKit) отмечаются синей звёздочкой */
+const OFFICIAL_PLUGIN_AUTHOR = "ForgeKit";
+
+export function isOfficialPlugin(meta: { author?: string | null } | null | undefined): boolean {
+  return !!meta?.author && meta.author === OFFICIAL_PLUGIN_AUTHOR;
 }
 
 export function isMac(): boolean {

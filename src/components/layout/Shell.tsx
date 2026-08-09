@@ -4,6 +4,7 @@ import { RouterProvider, useRouter } from "../../core/Router";
 import { getCategory, getTool } from "../../core/registry";
 import { isTauri } from "../../core/api";
 import { checkForUpdates, type UpdateCheck } from "../../core/updater";
+import { ModulesProvider, useModules } from "../../core/modules";
 import { TopBar } from "./TopBar";
 import { Sidebar } from "./Sidebar";
 import { GlobalSearch } from "./GlobalSearch";
@@ -11,8 +12,10 @@ import { OnboardingTour } from "./OnboardingTour";
 import { CategoryPage } from "./CategoryPage";
 import { TooltipProvider } from "../ui/tooltip";
 import { Skeleton } from "../ui/skeleton";
-import { I18nProvider } from "../../core/i18n";
+import { I18nProvider, useI18n } from "../../core/i18n";
 import { isFirstDay, isTourDone, markTourDone } from "../../core/firstRun";
+import { Puzzle, PlugZap } from "lucide-react";
+import { Button } from "../ui";
 
 function ToolSkeleton() {
   return (
@@ -39,10 +42,12 @@ function ToolSkeleton() {
 function Body() {
   const { current } = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
+  const { isEnabled } = useModules();
   const tool = getTool(current);
   const category = getCategory(current);
   /* Категория рендерится как страница, если id не совпадает ни с одним инструментом */
   const isCategory = !!category && tool.id !== current;
+  const isDisabled = !isCategory && !isEnabled(current);
 
   /* Ctrl/Cmd + K — локальный вызов поиска */
   useEffect(() => {
@@ -115,7 +120,13 @@ function Body() {
               className="flex min-h-0 min-w-0 flex-1 flex-col"
             >
               <Suspense fallback={<ToolSkeleton />}>
-                {isCategory ? <CategoryPage key={current} id={current} /> : <tool.component key={current} />}
+                {isCategory ? (
+                  <CategoryPage key={current} id={current} />
+                ) : isDisabled ? (
+                  <DisabledPage key={current} />
+                ) : (
+                  <tool.component key={current} />
+                )}
               </Suspense>
             </motion.div>
           </AnimatePresence>
@@ -131,10 +142,34 @@ export function Shell() {
   return (
     <I18nProvider>
       <TooltipProvider delayDuration={250}>
-        <RouterProvider>
-          <Body />
-        </RouterProvider>
+        <ModulesProvider>
+          <RouterProvider>
+            <Body />
+          </RouterProvider>
+        </ModulesProvider>
       </TooltipProvider>
     </I18nProvider>
+  );
+}
+
+/** Страница выключенного модуля: подсказка включить его в «Расширениях» */
+function DisabledPage() {
+  const { navigate } = useRouter();
+  const { t } = useI18n();
+  return (
+    <div className="grid h-full place-items-center">
+      <div className="flex max-w-sm flex-col items-center gap-4 text-center">
+        <span className="grid size-14 place-items-center rounded-2xl border border-border bg-muted/50 text-muted-foreground">
+          <PlugZap size={24} />
+        </span>
+        <div className="flex flex-col gap-1">
+          <p className="text-[15px] font-semibold">{t("mod.disabledTitle")}</p>
+          <p className="text-[13px] leading-relaxed text-muted-foreground">{t("mod.disabledDesc")}</p>
+        </div>
+        <Button variant="primary" leftIcon={<Puzzle size={15} />} onClick={() => navigate("plugins")}>
+          {t("mod.openManager")}
+        </Button>
+      </div>
+    </div>
   );
 }

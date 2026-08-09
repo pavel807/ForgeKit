@@ -1,5 +1,6 @@
 import { getCategory, getTool } from "../../core/registry";
 import { useI18n } from "../../core/i18n";
+import { useModules } from "../../core/modules";
 import { ToolCard } from "./ToolCard";
 import { HeaderIcon } from "./HeaderIcon";
 
@@ -11,9 +12,10 @@ interface CategoryPageProps {
 export function CategoryPage({ id }: CategoryPageProps) {
   const cat = getCategory(id);
   const { t } = useI18n();
+  const { isEnabled } = useModules();
   if (!cat) return null;
   const Icon = cat.icon;
-  const tools = cat.toolIds.map((t) => getTool(t));
+  const tools = cat.toolIds.map((toolId) => getTool(toolId)).filter((tool) => isEnabled(tool.id));
 
   return (
     <div className="flex h-full min-h-0 flex-col">

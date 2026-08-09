@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CATEGORIES } from "../../core/registry";
 import { useRouter } from "../../core/Router";
 import { useI18n } from "../../core/i18n";
+import { useModules } from "../../core/modules";
 import { getAppVersion } from "../../core/updater";
 import { ForgeMark } from "../ui/art";
 import { cn } from "@/lib/utils";
@@ -9,7 +10,15 @@ import { cn } from "@/lib/utils";
 export function Sidebar() {
   const { current, navigate } = useRouter();
   const { t } = useI18n();
+  const { isEnabled } = useModules();
   const [version, setVersion] = useState("");
+
+  useEffect(() => {
+    getAppVersion().then(setVersion);
+  }, []);
+
+  /* Скрываем категории, в которых не осталось ни одного включённого модуля */
+  const visibleCategories = CATEGORIES.filter((cat) => cat.toolIds.some((id) => isEnabled(id)));
 
   useEffect(() => {
     getAppVersion().then(setVersion);
@@ -24,7 +33,7 @@ export function Sidebar() {
 
       <div className="min-h-0 flex-1 overflow-y-auto p-3" data-tour="sidebar">
         <div className="flex flex-col gap-0.5">
-          {CATEGORIES.map((cat) => {
+          {visibleCategories.map((cat) => {
             const Icon = cat.icon;
             const active = current === cat.id;
             return (

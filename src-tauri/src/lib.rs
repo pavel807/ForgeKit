@@ -4,8 +4,18 @@ mod db;
 use db::AppDb;
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use tauri::http::{Response, StatusCode};
 use tauri::{Emitter, Manager};
 use tauri_plugin_global_shortcut::ShortcutState;
+
+/// Ответ с ошибкой для схемы fkplugin://
+fn http_response_error(status: StatusCode) -> Response<Vec<u8>> {
+    Response::builder()
+        .status(status)
+        .header("Content-Type", "text/plain; charset=utf-8")
+        .body(b"plugin file not found".to_vec())
+        .unwrap()
+}
 
 /// Иконка в системном трее: macOS — Menu Bar, Windows — системный трей.
 /// Слева-клик показывает окно (Windows — открывает меню), меню: показать/выйти.
@@ -76,6 +86,33 @@ pub fn run() {
                 })
                 .build(),
         )
+        /* Схема fkplugin:// — раздача файлов установленных плагинов
+           (песочница: отдельный origin, API Tauri плагину не доступен). */
+        .register_uri_scheme_protocol("fkplugin", |ctx, request| {
+            let app = ctx.app_handle().clone();
+            let req_path = request.uri().path().to_string();
+            match commands::plugins::resolve_plugin_file(&app, &req_path) {
+                Ok(file) => match std::fs::read(&file) {
+                    Ok(data) => Response::builder()
+                        .status(StatusCode::OK)
+                        .header("Content-Type", commands::plugins::mime_for(&file))
+                        .header("Cache-Control", "no-cache")
+                        .header("X-Content-Type-Options", "nosniff")
+                        .header(
+                            "Content-Security-Policy",
+                            "default-src 'self' fkplugin://localhost http://fkplugin.localhost 'unsafe-inline' 'unsafe-eval'; \
+                             img-src 'self' data: blob: fkplugin://localhost http://fkplugin.localhost; \
+                             font-src 'self' data:; connect-src 'self' fkplugin://localhost http://fkplugin.localhost; \
+                             media-src 'self' data: blob: fkplugin://localhost http://fkplugin.localhost; \
+                             style-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+                        )
+                        .body(data)
+                        .unwrap(),
+                    Err(_) => http_response_error(StatusCode::NOT_FOUND),
+                },
+                Err(_) => http_response_error(StatusCode::NOT_FOUND),
+            }
+        })
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
             let conn = db::open(dir)?;
@@ -160,6 +197,12 @@ pub fn run() {
             commands::settings::settings_get,
             commands::settings::settings_set,
             commands::settings::settings_get_all,
+            commands::settings::modules_get,
+            commands::plugins::plugin_list,
+            commands::plugins::plugin_install,
+            commands::plugins::plugin_install_zip,
+            commands::plugins::plugin_uninstall,
+            commands::plugins::plugin_base_url,
         ])
         .run(tauri::generate_context!())
         .expect("ошибка запуска ForgeKit");

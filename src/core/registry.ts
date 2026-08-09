@@ -3,6 +3,7 @@
 
 import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 import type { LucideIcon } from "lucide-react";
+import { isOfficialPlugin } from "./api";
 import {
   ArrowDownAZ,
   Binary,
@@ -68,6 +69,8 @@ export interface ToolDef {
   category: string;
   categoryName: string;
   component: LazyExoticComponent<ComponentType>;
+  /** Плагины официальных авторов отмечаются синей звёздочкой */
+  official?: boolean;
 }
 
 export interface CategoryDef {
@@ -623,8 +626,42 @@ export const TOOLS: ToolDef[] = [
 
 const TOOL_MAP = new Map(TOOLS.map((t) => [t.id, t]));
 
+/* Динамическая регистрация плагинов: общие статичные данные карточки. */
+const PLUGIN_TOOLS = new Map<string, ToolDef>();
+
+const pluginView = lazy(() => import("../components/tools/PluginView").then((m) => ({ default: m.default })));
+
+export function registerPluginTool(
+  meta: { id: string; name: string; description: string; author?: string | null },
+  icon: LucideIcon = Puzzle,
+): ToolDef | null {
+  if (TOOL_MAP.has(meta.id) || PLUGIN_TOOLS.has(meta.id)) return null;
+  const def: ToolDef = {
+    id: meta.id,
+    name: meta.name,
+    description: meta.description,
+    icon,
+    keywords: [meta.id, meta.name],
+    category: "plugins",
+    categoryName: "cat.plugins",
+    component: pluginView,
+    official: isOfficialPlugin(meta),
+  };
+  PLUGIN_TOOLS.set(meta.id, def);
+  return def;
+}
+
+export function removePluginTool(id: string): void {
+  PLUGIN_TOOLS.delete(id);
+}
+
 export function getTool(id: string): ToolDef {
-  return TOOL_MAP.get(id) ?? TOOLS[0];
+  return TOOL_MAP.get(id) ?? PLUGIN_TOOLS.get(id) ?? TOOLS[0];
+}
+
+/** Все инструменты: встроенные + текущие плагины. */
+export function getTools(): ToolDef[] {
+  return [...TOOLS, ...PLUGIN_TOOLS.values()];
 }
 
 export const CATEGORIES: CategoryDef[] = [

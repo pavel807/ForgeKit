@@ -27,3 +27,22 @@ pub fn settings_get_all(state: State<AppDb>) -> Result<HashMap<String, String>, 
         .map_err(|e| e.to_string())?;
     Ok(rows)
 }
+
+/// Состояние модулей (плагинов и встроенных инструментов): key — id модуля,
+/// value — "1" (включён) или "0" (выключен). Плагины хранятся под ключом `module:<id>`.
+#[tauri::command]
+pub fn modules_get(state: State<AppDb>) -> Result<Vec<(String, bool)>, String> {
+    let conn = state.0.lock().map_err(|e| e.to_string())?;
+    let mut stmt = conn
+        .prepare("SELECT key, value FROM settings WHERE key LIKE 'module:%'")
+        .map_err(|e| e.to_string())?;
+    let rows = stmt
+        .query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)))
+        .map_err(|e| e.to_string())?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|e| e.to_string())?;
+    Ok(rows
+        .into_iter()
+        .map(|(key, value)| (key.trim_start_matches("module:").to_string(), value == "1"))
+        .collect())
+}

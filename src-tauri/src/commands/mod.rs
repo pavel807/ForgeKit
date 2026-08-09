@@ -5,5 +5,6 @@ pub mod files;
 pub mod graphics;
 pub mod network;
 pub mod pdf;
+pub mod plugins;
 pub mod settings;
 pub mod system;

@@ -3,6 +3,7 @@ import { ArrowRight, ClipboardList } from "lucide-react";
 import { FEATURED_TOOLS } from "../core/registry";
 import { useRouter } from "../core/Router";
 import { api, isTauri, type ClipboardItem } from "../core/api";
+import { useModules } from "../core/modules";
 import { formatRelativeTime } from "../core/format";
 import { isFirstDay } from "../core/firstRun";
 import { useI18n } from "../core/i18n";
@@ -11,9 +12,12 @@ import { ToolCard } from "../components/layout/ToolCard";
 import { HeroArt } from "../components/ui/art";
 
 function QuickActions() {
+  const { isEnabled } = useModules();
+  const featured = FEATURED_TOOLS.filter((id) => isEnabled(id));
+  if (featured.length === 0) return null;
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
-      {FEATURED_TOOLS.map((id) => (
+      {featured.map((id) => (
         <ToolCard key={id} id={id} />
       ))}
     </div>

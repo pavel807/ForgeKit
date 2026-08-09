@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { getTool } from "../../core/registry";
 import { useRouter } from "../../core/Router";
 import { useI18n } from "../../core/i18n";
+import { OfficialStar } from "../ui";
 import { cn } from "@/lib/utils";
 
 export function ToolCard({ id }: { id: string }) {
@@ -27,7 +28,10 @@ export function ToolCard({ id }: { id: string }) {
         />
       </div>
       <span>
-        <span className="block text-sm font-semibold">{t(tool.name)}</span>
+        <span className="flex items-center gap-1.5 text-sm font-semibold">
+          {t(tool.name)}
+          {tool.official && <OfficialStar size={11} />}
+        </span>
         <span className="mt-1 block text-[12.5px] leading-relaxed text-muted-foreground">{t(tool.description)}</span>
       </span>
     </button>

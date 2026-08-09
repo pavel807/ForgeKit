@@ -12,11 +12,13 @@ interface ToolPageProps {
   actions?: ReactNode;
   statusLeft?: ReactNode;
   statusRight?: ReactNode;
+  /** Бейдж-звёздочка рядом с заголовком (например, для официальных плагинов) */
+  titleBadge?: ReactNode;
   children: ReactNode;
 }
 
 /** Единый шаблон страницы инструмента: заголовок → панель → рабочая область → статус-бар */
-export function ToolPage({ id, toolbar, actions, statusLeft, statusRight, children }: ToolPageProps) {
+export function ToolPage({ id, toolbar, actions, statusLeft, statusRight, titleBadge, children }: ToolPageProps) {
   const tool = getTool(id);
   const Icon = tool.icon;
   const { navigate } = useRouter();
@@ -45,7 +47,10 @@ export function ToolPage({ id, toolbar, actions, statusLeft, statusRight, childr
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h1 className="text-lg font-semibold leading-tight tracking-tight">{t(tool.name)}</h1>
+          <h1 className="flex items-center gap-2 text-lg font-semibold leading-tight tracking-tight">
+            {t(tool.name)}
+            {titleBadge}
+          </h1>
           <p className="mt-0.5 truncate text-[13px] text-muted-foreground">{t(tool.description)}</p>
         </div>
         {actions && <div className="ml-auto flex shrink-0 items-center gap-2">{actions}</div>}

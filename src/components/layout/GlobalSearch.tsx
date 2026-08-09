@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Command, Search } from "lucide-react";
-import { TOOLS, getTool } from "../../core/registry";
+import { getTools, getTool } from "../../core/registry";
 import { useRouter } from "../../core/Router";
 import { useI18n } from "../../core/i18n";
+import { useModules } from "../../core/modules";
 import { fuzzySearch } from "../../core/search";
 import { isTauri } from "../../core/api";
 import { cn } from "@/lib/utils";
-import { Kbd } from "../ui";
+import { Kbd, OfficialStar } from "../ui";
 
 interface GlobalSearchProps {
   open: boolean;
@@ -16,13 +17,17 @@ interface GlobalSearchProps {
 export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
   const { navigate } = useRouter();
   const { t } = useI18n();
+  const { isEnabled } = useModules();
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const searchableTools = useMemo(
-    () => TOOLS.map((t2) => ({ id: t2.id, name: t(t2.name), description: t(t2.description), keywords: t2.keywords, category: t2.category, categoryName: t(t2.categoryName) })),
-    [t],
+    () =>
+      getTools()
+        .filter((tool) => isEnabled(tool.id))
+        .map((tool) => ({ id: tool.id, name: t(tool.name), description: t(tool.description), keywords: tool.keywords, category: tool.category, categoryName: t(tool.categoryName) })),
+    [t, isEnabled],
   );
 
   useEffect(() => {
@@ -113,7 +118,10 @@ export function GlobalSearch({ open, onClose }: GlobalSearchProps) {
                     <Icon size={17} strokeWidth={2} />
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium">{r.item.name}</span>
+                    <span className="flex items-center gap-1.5 truncate text-sm font-medium">
+                      {r.item.name}
+                      {tool.official && <OfficialStar size={10} />}
+                    </span>
                     <span className="block truncate text-xs text-muted-foreground">{r.item.description}</span>
                   </span>
                 </button>

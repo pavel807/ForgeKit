@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
-import { Check, ChevronDown, Copy, Search } from "lucide-react";
+import { Check, ChevronDown, Copy, Search, Star } from "lucide-react";
 import { useState } from "react";
 import { Progress as ProgressPrimitive } from "radix-ui";
 
@@ -45,6 +45,19 @@ export function Button({ variant = "secondary", size = "md", leftIcon, className
       {leftIcon}
       {children}
     </ShadcnButton>
+  );
+}
+
+/* ---------- Синяя звёздочка официального плагина (как verified в Telegram) ---------- */
+export function OfficialStar({ size = 11 }: { size?: number }) {
+  return (
+    <Star
+      size={size}
+      aria-label=""
+      className="shrink-0 text-primary"
+      fill="currentColor"
+      strokeWidth={0}
+    />
   );
 }
 
